@@ -1,5 +1,7 @@
 
-
+#' A User object for use in Shinto apps
+#' @export
+#' @importFrom dplyr tbl collect
 shintoUser <- R6::R6Class(
   
   
@@ -56,6 +58,17 @@ shintoUser <- R6::R6Class(
       
     },
     
+    read_table = function(table, lazy = FALSE){
+      
+      out <- dplyr::tbl(self$con, table)
+      
+      if(!lazy){
+        out <- dplyr::collect(out)
+      }
+      
+      out
+      
+    },
     
     get_last_login = function(){
       
