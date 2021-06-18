@@ -1,0 +1,11 @@
+Package: shintousers
+Type: Package
+Title: Methods for Shiny Apps Users
+Version: 0.1
+Author: Remko Duursma
+Depends: shinyWidgets, shiny, uuid, R6
+Maintainer: Remko Duursma <remko@shintolabs.nl>
+Description: Read last login for the app for this user, get roles for the app.
+License: CC0
+Encoding: UTF-8
+RoxygenNote: 7.1.1
