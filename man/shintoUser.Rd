@@ -21,6 +21,7 @@ A User object for use in Shinto apps
 \item \href{#method-get_and_set_last_login}{\code{shintoUser$get_and_set_last_login()}}
 \item \href{#method-get_role}{\code{shintoUser$get_role()}}
 \item \href{#method-set_role}{\code{shintoUser$set_role()}}
+\item \href{#method-remove_role}{\code{shintoUser$remove_role()}}
 \item \href{#method-has_role}{\code{shintoUser$has_role()}}
 \item \href{#method-clone}{\code{shintoUser$clone()}}
 }
@@ -112,6 +113,15 @@ A User object for use in Shinto apps
 \subsection{Method \code{set_role()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$set_role(userid, appname, role)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-remove_role"></a>}}
+\if{latex}{\out{\hypertarget{method-remove_role}{}}}
+\subsection{Method \code{remove_role()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$remove_role(userid, appname)}\if{html}{\out{</div>}}
 }
 
 }

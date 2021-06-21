@@ -4,8 +4,8 @@ library(glue)
 library(DBI)
 library(dplyr)
 
-source("scripts/users_db_connection.R")
-source("scripts/users_r6_object.R")
+
+devtools::load_all()
 
 .user <- shintoUser$new("shintoanalytics", "remkoduursma", "testapp", config_file = "c:/repos/conf/config.yml")
 
@@ -20,5 +20,10 @@ source("scripts/users_r6_object.R")
 .user$has_role("admin2")
 
 
+.user$remove_role("wesley", "riec_rro")
 .user$set_role("wesley","riec_rro","viewer")
 .user$get_role("wesley", "riec_rro")
+
+.user$remove_role("wesley", "riec_rro")
+.user$get_role("wesley", "riec_rro")
+

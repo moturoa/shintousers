@@ -128,8 +128,7 @@ shintoUser <- R6::R6Class(
     
     set_role = function(userid, appname, role){
       
-      
-      if(is.null(self$get_role(userid))){
+      if(is.null(self$get_role(userid, appname))){
         
         self$append_data(
           "roles",
@@ -147,8 +146,13 @@ shintoUser <- R6::R6Class(
         self$execute_query(glue("UPDATE roles SET role = '{role}' 
                                  WHERE userid = '{userid}' and appname = '{appname}'"))
         
-        
       }
+      
+    },
+    
+    remove_role = function(userid, appname){
+    
+      self$execute_query(glue("delete from roles where userid = '{userid}' and appname = '{appname}'"))
       
     },
     

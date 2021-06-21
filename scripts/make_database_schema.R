@@ -37,7 +37,7 @@ sapply(appusers, grant_app)
 
 # Grant access to user shintoanalytics 
 # (gaan we gebruiken voor de app die de roles kan zetten)
-dbExecute(con, paste("grant select, insert, update on roles to shintoanalytics"))
+dbExecute(con, paste("grant select, insert, update, delete on roles to shintoanalytics"))
 dbExecute(con, paste("grant select, insert, update on logins to shintoanalytics"))
 
 
