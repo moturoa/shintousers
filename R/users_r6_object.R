@@ -13,7 +13,7 @@ shintoUser <- R6::R6Class(
     appname = NULL,
     
     
-    initialize = function(dbusername, userid, appname = NULL, ...){
+    initialize = function(dbusername, userid = NULL, appname = NULL, ...){
       
       self$con <- users_db_connection(dbusername, ...)
       
@@ -70,10 +70,13 @@ shintoUser <- R6::R6Class(
       
     },
     
-    get_last_login = function(){
+    get_last_login = function(userid = NULL, appname = NULL){
+      
+      if(is.null(userid))userid <- self$userid
+      if(is.null(appname))appname <- self$appname
       
        out <- self$query(glue("SELECT timestamp FROM logins WHERE 
-                                  userid = '{self$userid}' and appname = '{self$appname}'"))
+                                  userid = '{userid}' and appname = '{appname}'"))
       
        if(nrow(out) == 0)return(NULL)
        as.POSIXct(out$timestamp, tz = "UTC")
@@ -85,7 +88,6 @@ shintoUser <- R6::R6Class(
                                  WHERE userid = '{self$userid}' and appname = '{self$appname}'"))
       
     },
-    
     
     get_and_set_last_login = function(){
       
@@ -161,7 +163,56 @@ shintoUser <- R6::R6Class(
       roles <- self$get_role()
       as.character(role) %in% as.character(roles)
       
+    },
+    
+    add_application = function(appname, roles, comment = ""){
+      
+      data <- tibble(
+        appname = appname,
+        roles = jsonlite::toJSON(roles),
+        comment = comment
+      )
+      
+      d_exists <- nrow(self$query(glue("select * from applications where appname = '{appname}'"))) > 0
+      
+      if(!d_exists){
+        dbWriteTable(self$con, "applications", data, append = TRUE)  
+      }
+      
+    },
+    
+    set_application_roles = function(appname, roles){
+      
+      role_json <- jsonlite::toJSON(roles)
+      self$execute_query(glue("update applications set roles = '{role_json}' where appname = '{appname}'"))
+      
+    },
+    
+    get_application_roles = function(appname){
+      
+      out <- self$query(glue("select roles from applications where appname = '{appname}'"))$roles
+      
+      if(length(out) == 0){
+        return(NA)
+      } else {
+        return(jsonlite::fromJSON(out))
+      }
+      
+    },
+    
+    get_applications = function(){
+      
+      sort(self$query(glue("select appname from applications"))$appname)
+      
+    },
+    
+    remove_application = function(appname){
+      
+      self$execute_query(glue("delete from applications where appname = '{appname}'"))
+      
     }
+    
+    
     
   )
   

@@ -23,6 +23,11 @@ A User object for use in Shinto apps
 \item \href{#method-set_role}{\code{shintoUser$set_role()}}
 \item \href{#method-remove_role}{\code{shintoUser$remove_role()}}
 \item \href{#method-has_role}{\code{shintoUser$has_role()}}
+\item \href{#method-add_application}{\code{shintoUser$add_application()}}
+\item \href{#method-set_application_roles}{\code{shintoUser$set_application_roles()}}
+\item \href{#method-get_application_roles}{\code{shintoUser$get_application_roles()}}
+\item \href{#method-get_applications}{\code{shintoUser$get_applications()}}
+\item \href{#method-remove_application}{\code{shintoUser$remove_application()}}
 \item \href{#method-clone}{\code{shintoUser$clone()}}
 }
 }
@@ -31,7 +36,7 @@ A User object for use in Shinto apps
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$new(dbusername, userid, appname = NULL, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$new(dbusername, userid = NULL, appname = NULL, ...)}\if{html}{\out{</div>}}
 }
 
 }
@@ -76,7 +81,7 @@ A User object for use in Shinto apps
 \if{latex}{\out{\hypertarget{method-get_last_login}{}}}
 \subsection{Method \code{get_last_login()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_last_login()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_last_login(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
 }
 
 }
@@ -131,6 +136,51 @@ A User object for use in Shinto apps
 \subsection{Method \code{has_role()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$has_role(role)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-add_application"></a>}}
+\if{latex}{\out{\hypertarget{method-add_application}{}}}
+\subsection{Method \code{add_application()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$add_application(appname, roles, comment = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_application_roles"></a>}}
+\if{latex}{\out{\hypertarget{method-set_application_roles}{}}}
+\subsection{Method \code{set_application_roles()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$set_application_roles(appname, roles)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_application_roles"></a>}}
+\if{latex}{\out{\hypertarget{method-get_application_roles}{}}}
+\subsection{Method \code{get_application_roles()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_application_roles(appname)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_applications"></a>}}
+\if{latex}{\out{\hypertarget{method-get_applications}{}}}
+\subsection{Method \code{get_applications()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_applications()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-remove_application"></a>}}
+\if{latex}{\out{\hypertarget{method-remove_application}{}}}
+\subsection{Method \code{remove_application()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$remove_application(appname)}\if{html}{\out{</div>}}
 }
 
 }

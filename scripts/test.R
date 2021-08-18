@@ -20,10 +20,14 @@ devtools::load_all()
 .user$has_role("admin2")
 
 
-.user$remove_role("wesley", "riec_rro")
-.user$set_role("wesley","riec_rro","viewer")
-.user$get_role("wesley", "riec_rro")
+.user$remove_role("remkoduursma", "testapp")
+.user$set_role("remkoduursma","testapp","viewer")
+.user$get_role("remkoduursma", "testapp")
 
-.user$remove_role("wesley", "riec_rro")
-.user$get_role("wesley", "riec_rro")
-
+.user$add_application("testapp", roles = c("viewer","admin"))
+.user$get_applications()
+.user$get_application_roles("testapp")
+.user$set_application_roles("testapp", roles = c("viewer","admin","public"))
+.user$get_application_roles("testapp")
+.user$set_application_roles("testapp", roles = c("viewer","admin"))
+.user$remove_application("testapp")
