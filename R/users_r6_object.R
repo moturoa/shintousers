@@ -13,7 +13,9 @@ shintoUser <- R6::R6Class(
     appname = NULL,
     
     
-    initialize = function(dbusername, userid = NULL, appname = NULL, ...){
+    initialize = function(dbusername = "shintoanalytics", 
+                          userid = NULL, 
+                          appname = NULL, ...){
       
       self$con <- users_db_connection(dbusername, ...)
       

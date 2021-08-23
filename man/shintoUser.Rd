@@ -36,7 +36,12 @@ A User object for use in Shinto apps
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$new(dbusername, userid = NULL, appname = NULL, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$new(
+  dbusername = "shintoanalytics",
+  userid = NULL,
+  appname = NULL,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 }
