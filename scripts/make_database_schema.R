@@ -18,10 +18,10 @@ dbExecute(con, "create table if not exists logins (
 
 dbExecute(con, "create table if not exists roles (
                   userid varchar,
-                  username varchar,
                   appname varchar,
                   role varchar,
-                  comment varchar
+                  comment varchar,
+                  attributes text
           )")
 
 dbExecute(con, "create table if not exists applications (
