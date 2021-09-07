@@ -138,7 +138,6 @@ shintoUser <- R6::R6Class(
           "roles",
           tibble(
             userid = userid,
-            username = "",
             appname = appname,
             role = role,
             comment = ""
