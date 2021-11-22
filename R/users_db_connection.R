@@ -16,7 +16,7 @@ users_db_connection <- function(dbusername, config_file = "conf/config.yml"){
     DBI::dbConnect(RPostgres::Postgres(), 
                    dbname = "users", 
                    host = conf$dbhost, 
-                   port = PORT, 
+                   port = port, 
                    user = conf$dbuser, 
                    password = conf$dbpassword)
   
