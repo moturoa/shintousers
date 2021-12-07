@@ -2,7 +2,7 @@
 #---- Script to initialize database schema
 
 # Config
-con <- shintobag::shinto_db_connection("admin_users", file = "c:/repos/conf/remko.yml")
+con <- shintobag::shinto_db_connection("shintousers_admin", file = "d:/repos/conf/config.yml")
 
 library(DBI)
 library(RPostgres)
@@ -21,7 +21,8 @@ dbExecute(con, "create table if not exists roles (
                   appname varchar,
                   role varchar,
                   comment varchar,
-                  attributes text
+                  attributes text,
+                  groep text
           )")
 
 dbExecute(con, "create table if not exists applications (
