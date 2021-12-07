@@ -2,7 +2,7 @@
 #' Connect to the users database from an app
 #' @param dbusername Database user name on devpostgres02 for this app ('risicoradar','wbm_eindhoven')
 #' @export
-users_db_connection <- function(dbusername = "shintousers", config_file = "conf/config.yml"){
+users_db_connection <- function(dbusername = "shintousers", dbname = "users", config_file = "conf/config.yml"){
   
     conf <- config::get(dbusername, file = config_file)
     
@@ -14,7 +14,7 @@ users_db_connection <- function(dbusername = "shintousers", config_file = "conf/
     port <- ifelse(is.null(conf$dbport),5432,conf$dbport)
     
     DBI::dbConnect(RPostgres::Postgres(), 
-                   dbname = "users", 
+                   dbname = dbname, 
                    host = conf$dbhost, 
                    port = port, 
                    user = conf$dbuser, 

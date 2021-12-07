@@ -13,11 +13,12 @@ shintoUser <- R6::R6Class(
     appname = NULL,
     
     
-    initialize = function(dbusername = "shintoanalytics", 
+    initialize = function(dbusername = "shintousers", 
+                          dbname = "users",
                           userid = NULL, 
                           appname = NULL, ...){
       
-      self$con <- users_db_connection(dbusername, ...)
+      self$con <- users_db_connection(dbusername=dbusername, dbname=dbname,...)
       
       self$userid <- userid
       
