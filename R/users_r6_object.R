@@ -173,24 +173,25 @@ shintoUser <- R6::R6Class(
       
       group <- jsonlite::toJSON(group)
       
-      if(is.null(self$get_group(userid, appname))){
-        
-        self$append_data(
-          "roles",
-          tibble(
-            userid = userid,
-            appname = appname,
-            groep = group,
-            comment = ""
-          )
-        )
-        
-      } else {
-        
+      # 
+      # if(is.null(self$get_group(userid, appname))){
+      #   
+      #   self$append_data(
+      #     "roles",
+      #     tibble(
+      #       userid = userid,
+      #       appname = appname,
+      #       groep = group,
+      #       comment = ""
+      #     )
+      #   )
+      #   
+      # } else {
+      #   
         self$execute_query(glue("UPDATE roles SET groep = '{group}' 
                                  WHERE userid = '{userid}' and appname = '{appname}'"))
         
-      }
+      #}
       
     },
     
