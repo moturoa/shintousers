@@ -256,7 +256,7 @@ shintoUser <- R6::R6Class(
       
       out <- self$query(glue("select groups from applications where appname = '{appname}'"))$groups
       
-      if(length(out) == 0){
+      if(length(out) == 0 || out == ""){
         return(NA)
       } else {
         return(jsonlite::fromJSON(out))
