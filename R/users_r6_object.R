@@ -131,6 +131,21 @@ shintoUser <- R6::R6Class(
       
     },
     
+    get_group = function(userid = NULL, appname = NULL){
+      
+      if(is.null(userid))userid <- self$userid
+      if(is.null(appname))appname <- self$appname
+      
+      out <- self$query(glue("select groep from roles where userid = '{userid}' and appname = '{appname}'"))
+      
+      if(nrow(out) == 0 || out$groep == ""){
+        return(NULL)
+      }
+      
+      jsonlite::fromJSON(out$groep)
+      
+    },
+    
     set_role = function(userid, appname, role){
       
       if(is.null(self$get_role(userid, appname))){
@@ -154,6 +169,31 @@ shintoUser <- R6::R6Class(
       
     },
     
+    set_group = function(userid, appname, group){
+      
+      group <- jsonlite::toJSON(group)
+      
+      if(is.null(self$get_group(userid, appname))){
+        
+        self$append_data(
+          "roles",
+          tibble(
+            userid = userid,
+            appname = appname,
+            groep = group,
+            comment = ""
+          )
+        )
+        
+      } else {
+        
+        self$execute_query(glue("UPDATE roles SET groep = '{group}' 
+                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+        
+      }
+      
+    },
+    
     remove_role = function(userid, appname){
     
       self$execute_query(glue("delete from roles where userid = '{userid}' and appname = '{appname}'"))
@@ -167,11 +207,12 @@ shintoUser <- R6::R6Class(
       
     },
     
-    add_application = function(appname, roles, comment = ""){
+    add_application = function(appname, roles, groups, comment = ""){
       
       data <- tibble(
         appname = appname,
         roles = jsonlite::toJSON(roles),
+        groups = jsonlite::toJSON(groups),
         comment = comment
       )
       
@@ -190,6 +231,14 @@ shintoUser <- R6::R6Class(
       
     },
     
+    set_application_groups = function(appname, groups){
+      
+      group_json <- jsonlite::toJSON(groups)
+      self$execute_query(glue("update applications set groups = '{group_json}' where appname = '{appname}'"))
+      
+    },
+    
+    
     get_application_roles = function(appname){
       
       out <- self$query(glue("select roles from applications where appname = '{appname}'"))$roles
@@ -201,6 +250,19 @@ shintoUser <- R6::R6Class(
       }
       
     },
+    
+    get_application_groups = function(appname){
+      
+      out <- self$query(glue("select groups from applications where appname = '{appname}'"))$groups
+      
+      if(length(out) == 0){
+        return(NA)
+      } else {
+        return(jsonlite::fromJSON(out))
+      }
+      
+    },
+    
     
     get_applications = function(){
       
