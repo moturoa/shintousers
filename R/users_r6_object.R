@@ -16,9 +16,16 @@ shintoUser <- R6::R6Class(
     initialize = function(dbusername = "shintousers", 
                           dbname = "users",
                           userid = NULL, 
-                          appname = NULL, ...){
+                          appname = NULL, 
+                          con = NULL,
+                          ...){
       
-      self$con <- users_db_connection(dbusername=dbusername, dbname=dbname,...)
+      if(is.null(con)){
+        self$con <- users_db_connection(dbusername=dbusername, dbname=dbname,...)  
+      } else {
+        self$con <- con
+      }
+      
       
       self$userid <- userid
       
@@ -136,9 +143,9 @@ shintoUser <- R6::R6Class(
       if(is.null(userid))userid <- self$userid
       if(is.null(appname))appname <- self$appname
       
-      out <- self$query(glue("select groep from roles where userid = '{userid}' and appname = '{appname}'"))
+      out <- self$query(glue::glue("select groep from roles where userid = '{userid}' and appname = '{appname}'"))
       
-      if(nrow(out) == 0 || out$groep == ""){
+      if(nrow(out) == 0 || is.na(out$groep[1]) || out$groep == ""){
         return(NULL)
       }
       
