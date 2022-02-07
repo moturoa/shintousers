@@ -251,7 +251,7 @@ shintoUser <- R6::R6Class(
       
       out <- self$query(glue("select roles from applications where appname = '{appname}'"))$roles
       
-      if(length(out) == 0){
+      if(all(is.na(out)) || length(out) == 0){
         return(NA)
       } else {
         return(jsonlite::fromJSON(out))
@@ -263,7 +263,7 @@ shintoUser <- R6::R6Class(
       
       out <- self$query(glue("select groups from applications where appname = '{appname}'"))$groups
       
-      if(length(out) == 0 || out == ""){
+      if(all(is.na(out)) || length(out) == 0 || out == ""){
         return(NA)
       } else {
         return(jsonlite::fromJSON(out))
