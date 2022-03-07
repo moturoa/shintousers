@@ -1,7 +1,7 @@
 Package: shintousers
 Type: Package
 Title: Methods for Shiny Apps Users
-Version: 0.3-2
+Version: 0.4
 Author: Remko Duursma
 Depends: shinyWidgets, shiny, uuid, R6, glue
 Maintainer: Remko Duursma <remko@shintolabs.nl>
