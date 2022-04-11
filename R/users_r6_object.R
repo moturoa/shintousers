@@ -42,6 +42,12 @@ shintoUser <- R6::R6Class(
       
     },
     
+    close = function(){
+      
+      dbDisconnect(self$con)
+      
+    },
+    
     query = function(txt, glue = TRUE){
       
       if(glue)txt <- glue::glue(txt)
