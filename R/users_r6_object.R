@@ -153,6 +153,15 @@ shintoUser <- R6::R6Class(
     return(invisible(user_log))
     },
     
+    #' @description Does an app have a user configured?
+    app_has_user = function(userid, appname){
+      
+      out <- self$query(glue("select * from {self$schema}.roles where userid = '{userid}' and appname = '{appname}'"))
+      nrow(out) > 0
+      
+    },
+    
+    
     #' @description Gets the role for the current user (admin or viewer, typically)
     get_role = function(userid = NULL, appname = NULL){
       
@@ -173,7 +182,7 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     set_role = function(userid, appname, role){
       
-      if(is.null(self$get_role(userid, appname))){
+      if(!self$app_has_user(userid, appname)){
         
         self$append_data(
           "roles",
@@ -223,7 +232,7 @@ shintoUser <- R6::R6Class(
       
       group <- jsonlite::toJSON(group)
       
-      if(is.null(self$get_group(userid, appname))){
+      if(!self$app_has_user(userid, appname)){
 
         self$append_data(
           "roles",
