@@ -19,15 +19,19 @@ shintoUser <- R6::R6Class(
     #' @description The application (shiny) user name
     userid = NULL,
     
-    #' @appname The (rsconnect) application name
+    #' @description The (rsconnect) application name
     appname = NULL,
+    
+    #' @description Version of the app (optionally read from VERSION)
+    appversion = NULL,
     
     
     initialize = function(dbusername = "shintousers", 
                           dbname = "shintousers",
                           schema = "shintousers",
                           userid = NULL, 
-                          appname = NULL, 
+                          appname = "", 
+                          appversion = "",
                           con = NULL,
                           ...){
       
@@ -48,6 +52,7 @@ shintoUser <- R6::R6Class(
         if(is.na(appname))stop("Provide appname or run from rsconnect!")
       }
       self$appname <- appname
+      self$appversion <- appversion
       
     },
     
@@ -111,7 +116,7 @@ shintoUser <- R6::R6Class(
       if(is.null(userid))userid <- self$userid
       if(is.null(appname))appname <- self$appname
       
-       out <- self$query(glue("SELECT timestamp FROM {self$schema}.logins WHERE 
+       out <- self$query(glue::glue("SELECT timestamp, appversion FROM {self$schema}.logins WHERE 
                                   userid = '{userid}' and appname = '{appname}'"))
       
        if(nrow(out) == 0)return(NULL)
@@ -121,8 +126,10 @@ shintoUser <- R6::R6Class(
     #' @description Update the last login for this user / appname (in table `shintousers.logins`)
     set_last_login = function(now = as.character(Sys.time())){
       
-      self$execute_query(glue("UPDATE {self$schema}.logins SET timestamp = '{now}' 
-                                 WHERE userid = '{self$userid}' and appname = '{self$appname}'"))
+      query <- glue::glue("UPDATE {self$schema}.logins SET timestamp = '{now}', appversion = '{self$appversion}' ",
+                          "WHERE userid = '{self$userid}' and appname = '{self$appname}'")
+      
+      self$execute_query(query)
       
     },
   
@@ -138,10 +145,11 @@ shintoUser <- R6::R6Class(
       if(is.null(user_log)){
         self$append_data(
           "logins",
-          tibble(
+          tibble::tibble(
               timestamp  = as.character(Sys.time()),
               userid = self$userid,
-              appname = self$appname
+              appname = self$appname,
+              appversion = self$appversion
           )
         )
         
@@ -168,7 +176,7 @@ shintoUser <- R6::R6Class(
       if(is.null(userid))userid <- self$userid
       if(is.null(appname))appname <- self$appname
       
-      out <- self$query(glue("select role from {self$schema}.roles where userid = '{userid}' and appname = '{appname}'"))
+      out <- self$query(glue::glue("select role from {self$schema}.roles where userid = '{userid}' and appname = '{appname}'"))
       
       if(nrow(out) == 0){
         return(NULL)
@@ -196,7 +204,7 @@ shintoUser <- R6::R6Class(
         
       } else {
         
-        self$execute_query(glue("UPDATE {self$schema}.roles SET role = '{role}' 
+        self$execute_query(glue::glue("UPDATE {self$schema}.roles SET role = '{role}' 
                                  WHERE userid = '{userid}' and appname = '{appname}'"))
         
       }
@@ -236,7 +244,7 @@ shintoUser <- R6::R6Class(
 
         self$append_data(
           "roles",
-          tibble(
+          tibble::tibble(
             userid = userid,
             appname = appname,
             groep = group
@@ -245,7 +253,7 @@ shintoUser <- R6::R6Class(
 
       } else {
 
-        self$execute_query(glue("UPDATE {self$schema}.roles SET groep = '{group}' 
+        self$execute_query(glue::glue("UPDATE {self$schema}.roles SET groep = '{group}' 
                                  WHERE userid = '{userid}' and appname = '{appname}'"))
         
       }
@@ -256,7 +264,7 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     remove_role = function(userid, appname){
     
-      self$execute_query(glue("delete from {self$schema}.roles where userid = '{userid}' and appname = '{appname}'"))
+      self$execute_query(glue::glue("delete from {self$schema}.roles where userid = '{userid}' and appname = '{appname}'"))
       
     },
     
@@ -272,14 +280,14 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     add_application = function(appname, roles, groups, comment = ""){
       
-      data <- tibble(
+      data <- tibble::tibble(
         appname = appname,
         roles = jsonlite::toJSON(roles),
         groups = jsonlite::toJSON(groups),
         comment = comment
       )
       
-      d_exists <- nrow(self$query(glue("select * from {self$schema}.applications where appname = '{appname}'"))) > 0
+      d_exists <- nrow(self$query(glue::glue("select * from {self$schema}.applications where appname = '{appname}'"))) > 0
       
       if(!d_exists){
         self$append_data("applications", data)
@@ -292,7 +300,7 @@ shintoUser <- R6::R6Class(
     set_application_roles = function(appname, roles){
       
       role_json <- jsonlite::toJSON(roles)
-      self$execute_query(glue("update {self$schema}.applications set roles = '{role_json}' where appname = '{appname}'"))
+      self$execute_query(glue::glue("update {self$schema}.applications set roles = '{role_json}' where appname = '{appname}'"))
       
     },
     
@@ -301,7 +309,7 @@ shintoUser <- R6::R6Class(
     set_application_groups = function(appname, groups){
       
       group_json <- jsonlite::toJSON(groups)
-      self$execute_query(glue("update {self$schema}.applications set groups = '{group_json}' where appname = '{appname}'"))
+      self$execute_query(glue::glue("update {self$schema}.applications set groups = '{group_json}' where appname = '{appname}'"))
       
     },
     
@@ -309,7 +317,7 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     get_application_roles = function(appname){
       
-      out <- self$query(glue("select roles from {self$schema}.applications where appname = '{appname}'"))$roles
+      out <- self$query(glue::glue("select roles from {self$schema}.applications where appname = '{appname}'"))$roles
       
       if(all(is.na(out)) || length(out) == 0){
         return(NA)
@@ -323,7 +331,7 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     get_application_groups = function(appname){
       
-      out <- self$query(glue("select groups from {self$schema}.applications where appname = '{appname}'"))$groups
+      out <- self$query(glue::glue("select groups from {self$schema}.applications where appname = '{appname}'"))$groups
       
       if(all(is.na(out)) || length(out) == 0 || out == ""){
         return(NA)
@@ -337,7 +345,7 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     get_applications = function(){
       
-      sort(self$query(glue("select appname from {self$schema}.applications"))$appname)
+      sort(self$query(glue::glue("select appname from {self$schema}.applications"))$appname)
       
     },
     
@@ -345,7 +353,7 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     remove_application = function(appname){
       
-      self$execute_query(glue("delete from {self$schema}.applications where appname = '{appname}'"))
+      self$execute_query(glue::glue("delete from {self$schema}.applications where appname = '{appname}'"))
       
     }
     
