@@ -47,14 +47,22 @@ shintoUser <- R6::R6Class(
       
       self$userid <- userid
       
-      if(is.null(appname)){
-        appname <- get_appname_from_url()
-        if(is.na(appname))stop("Provide appname or run from rsconnect!")
-      }
+      
+      # if(is.null(appname)){
+      #   appname <- get_appname_from_url()
+      #   if(is.na(appname))stop("Provide appname or run from rsconnect!")
+      # }
+      
       self$appname <- appname
       self$appversion <- appversion
       
     },
+    
+    #' @description Convert to JSON 
+    to_json = function(txt){
+      jsonlite::toJSON(txt)  
+    },
+    
     
     #' @description Close the DB connection
     close = function(){
@@ -124,10 +132,15 @@ shintoUser <- R6::R6Class(
     },
     
     #' @description Update the last login for this user / appname (in table `shintousers.logins`)
-    set_last_login = function(now = as.character(Sys.time())){
+    set_last_login = function(now = as.character(Sys.time()),
+                              userid = NULL, appname = NULL, appversion = NULL){
       
-      query <- glue::glue("UPDATE {self$schema}.logins SET timestamp = '{now}', appversion = '{self$appversion}' ",
-                          "WHERE userid = '{self$userid}' and appname = '{self$appname}'")
+      if(is.null(userid))userid <- self$userid
+      if(is.null(appname))appname <- self$appname
+      if(is.null(appversion))appversion <- self$appversion
+      
+      query <- glue::glue("UPDATE {self$schema}.logins SET timestamp = '{now}', appversion = '{appversion}' ",
+                          "WHERE userid = '{userid}' and appname = '{appname}'")
       
       self$execute_query(query)
       
@@ -137,9 +150,13 @@ shintoUser <- R6::R6Class(
     #' @details If user has never logged in, writes a new line in `shintousers.logins`,
     #' otherwise updates the last login. 
     #' @returns Returns (invisibly) the last login information
-    get_and_set_last_login = function(){
+    get_and_set_last_login = function(userid = NULL, appname = NULL, appversion = NULL){
       
       user_log <- self$get_last_login()
+      
+      if(is.null(userid))userid <- self$userid
+      if(is.null(appname))appname <- self$appname
+      if(is.null(appversion))appversion <- self$appversion
       
       # User has not previously logged in
       if(is.null(user_log)){
@@ -147,9 +164,9 @@ shintoUser <- R6::R6Class(
           "logins",
           tibble::tibble(
               timestamp  = as.character(Sys.time()),
-              userid = self$userid,
-              appname = self$appname,
-              appversion = self$appversion
+              userid = userid,
+              appname = appname,
+              appversion = appversion
           )
         )
         
@@ -230,7 +247,7 @@ shintoUser <- R6::R6Class(
     #' @description Is the user in this group? `$is_in_group("superuser")` -> bool
     is_in_group = function(group){
       
-      group %in% self$get_group()
+      isTRUE(group %in% self$get_group())
       
     },
     
@@ -238,7 +255,7 @@ shintoUser <- R6::R6Class(
     #' @details !! Do not use in shiny applications (except shintousers_app) !!
     set_group = function(userid, appname, group){
       
-      group <- jsonlite::toJSON(group)
+      group <- self$to_json(group)
       
       if(!self$app_has_user(userid, appname)){
 
@@ -272,7 +289,7 @@ shintoUser <- R6::R6Class(
     has_role = function(role){
       
       roles <- self$get_role()
-      as.character(role) %in% as.character(roles)
+      isTRUE(as.character(role) %in% as.character(roles))
       
     },
     
