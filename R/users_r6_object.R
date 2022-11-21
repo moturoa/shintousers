@@ -303,6 +303,8 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param appname rsconnect application name
     set_group = function(userid, appname, group){
       
+      if(is.null(group))return(NULL)
+      
       group <- self$to_json(group)
       
       if(!self$app_has_user(userid, appname)){
