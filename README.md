@@ -4,8 +4,9 @@
 
 ## Installation
 
+
 ```
-devtools::install_github("moturoa/shintousers")
+remotes::install_github("moturoa/shintousers")
 ```
 
 

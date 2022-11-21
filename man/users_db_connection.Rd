@@ -4,10 +4,18 @@
 \alias{users_db_connection}
 \title{Connect to the users database from an app}
 \usage{
-users_db_connection(dbusername, config_file = "conf/config.yml")
+users_db_connection(
+  dbusername = "shintousers",
+  dbname = "shintousers",
+  config_file = "conf/config.yml"
+)
 }
 \arguments{
 \item{dbusername}{Database user name on devpostgres02 for this app ('risicoradar','wbm_eindhoven')}
+
+\item{dbname}{Database name}
+
+\item{config_file}{Path to DB connection YAML}
 }
 \description{
 Connect to the users database from an app
