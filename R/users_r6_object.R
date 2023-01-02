@@ -156,7 +156,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                                   userid = '{userid}' and appname = '{appname}'"))
       
        if(nrow(out) == 0)return(NULL)
-       as.POSIXct(out$timestamp, tz = "UTC")
+       setNames(as.POSIXct(out$timestamp, tz = "UTC"), out$appversion)
     },
     
     #' @description Update the last login for this user / appname (in table `shintousers.logins`)
