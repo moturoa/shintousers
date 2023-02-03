@@ -12,7 +12,6 @@ users_db_connection <- function(dbusername = "shintousers",
   
     conf <- config::get(dbusername, file = config_file)
     
-    # cfg. allow_default_fallback in shintobag::shinto_db_connection
     if(is.null(conf)){
       conf <- config::get(dbusername, config = "default", file = config_file)
     }

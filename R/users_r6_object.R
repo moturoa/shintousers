@@ -43,8 +43,8 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param con Optional, existing database connection to shintousers (for recycling)
     #' @param ... Further arguments passed to [users_db_connection()]
     #' @return A 'shintousers' R6 object
-    initialize = function(dbusername = "shintousers", 
-                          dbname = "shintousers",
+    initialize = function(dbusername = NULL, 
+                          dbname = NULL,
                           schema = "shintousers",
                           userid = NULL, 
                           appname = "", 
@@ -53,10 +53,14 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                           ...){
       
       
+      if(!is.null(dbusername) | !is.null(dbname)){
+        message("Arguments 'dbusername' and 'dbname' to shintousers are now ignored! Are both 'shintousers' in conf/config.yml")
+      }
+      
       self$schema <- schema
       
       if(is.null(con)){
-        self$con <- users_db_connection(dbusername=dbusername, dbname=dbname,...)  
+        self$con <- shintodb::connect("shintousers")
       } else {
         self$con <- con
       }

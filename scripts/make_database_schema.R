@@ -2,7 +2,7 @@
 #---- Script to initialize database schema
 
 # Config
-con <- shintobag::shinto_db_connection("shintousers_admin", file = "d:/repos/conf/config.yml")
+con <- shintodb::connect("shintousers_admin", file = "d:/repos/conf/config.yml")
 
 library(DBI)
 library(RPostgres)
