@@ -441,8 +441,32 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       self$execute_query(glue::glue("delete from {self$schema}.applications where appname = '{appname}'"))
       
-    }
+    },
     
+    
+    #' @description Log a timing. Writes data to 'timings' table in shintousers, with appname, key and
+    #' double precision value. 
+    #' @param 
+    log_timing = function(key, timing){
+      
+      v_n <- try(as.numeric(timing))
+      if(inherits(v_n, "try-error")){
+        message("non-numeric to $log_timing")
+        return(NULL)
+      }
+      
+      self$append_data(
+        "timings",
+        data.frame(
+          appname = self$appname,
+          key = key,
+          value = v_n,
+          userid  = self$userid
+        )
+      )
+        
+      
+    }
     
     
   )

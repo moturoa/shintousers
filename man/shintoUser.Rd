@@ -56,6 +56,7 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoUsers-get_application_groups}{\code{shintoUser$get_application_groups()}}
 \item \href{#method-ShintoUsers-get_applications}{\code{shintoUser$get_applications()}}
 \item \href{#method-ShintoUsers-remove_application}{\code{shintoUser$remove_application()}}
+\item \href{#method-ShintoUsers-log_timing}{\code{shintoUser$log_timing()}}
 \item \href{#method-ShintoUsers-clone}{\code{shintoUser$clone()}}
 }
 }
@@ -66,8 +67,8 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 Make new shintousers object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$new(
-  dbusername = "shintousers",
-  dbname = "shintousers",
+  dbusername = NULL,
+  dbname = NULL,
   schema = "shintousers",
   userid = NULL,
   appname = "",
@@ -610,6 +611,17 @@ Remove an application
 }
 \subsection{Details}{
 !! Do not use in shiny applications (except shintousers_app) !!
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-log_timing"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-log_timing}{}}}
+\subsection{Method \code{log_timing()}}{
+Log a timing. Writes data to 'timings' table in shintousers, with appname, key and
+double precision value.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$log_timing(key, timing)}\if{html}{\out{</div>}}
 }
 
 }

@@ -2,12 +2,20 @@
 #---- Script to initialize database schema
 
 # Config
-con <- shintodb::connect("shintousers_admin", file = "d:/repos/conf/config.yml")
+
+if(FALSE){
+  shintodb::make_config()
+  shintodb::add_config_entry("shintousers","shintousers", where = "development", encrypt = TRUE)
+  shintodb::add_config_entry("shintousers","shintousers", where = "production", encrypt = TRUE)
+}
+
+
 
 library(DBI)
 library(RPostgres)
 library(dplyr)
 
+con <- shintodb::connect("shintousers")
 
 # Make tables
 dbExecute(con, "create table if not exists logins (
@@ -31,29 +39,13 @@ dbExecute(con, "create table if not exists applications (
                   comment varchar
           )")
 
-# # test
-# dbWriteTable(con, "applications", tibble(appname = "test", 
-#                                          roles = jsonlite::toJSON(c("admin","viewer")),
-#                                          comment = ""
-#                                          ),
-#              append = TRUE)
-# dbExecute(con, "truncate applications")
-
-# Grant access to apps
-grant_app <- function(appusername){
-  dbExecute(con, paste("grant select on roles to", appusername))
-  dbExecute(con, paste("grant select, insert, update on logins to", appusername))
-}
-
-appusers <- c("wbm_eindhoven","wbm_groningen","wbm_zaanstad","risicoradar","ede_linkit")
-
-sapply(appusers, grant_app)
-
-# Grant access to user shintoanalytics 
-# (gaan we gebruiken voor de app die de roles kan zetten)
-dbExecute(con, paste("grant select, insert, update, delete on roles to shintoanalytics"))
-dbExecute(con, paste("grant select, insert, update on logins to shintoanalytics"))
-
+dbExecute(con, "create table if not exists timings (
+                  appname varchar,
+                  key varchar,
+                  value double precision,
+                  userid varchar,
+                  timestamp timestamp without time zone default current_timestamp
+          )")
 
 
 
