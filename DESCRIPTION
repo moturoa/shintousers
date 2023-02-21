@@ -1,7 +1,7 @@
 Package: shintousers
 Type: Package
 Title: Methods for Shiny Apps Users
-Version: 1.0.1
+Version: 1.1
 Author: Remko Duursma
 Imports: R6, glue, DBI, dplyr, dbplyr, tibble, RPostgres, jsonlite, config
 Maintainer: Remko Duursma <remko@shintolabs.nl>

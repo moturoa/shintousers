@@ -10,8 +10,9 @@
 #' @importFrom R6 R6Class
 #' @importFrom dbplyr in_schema
 #' @export
-shintoUser <- R6::R6Class(classname = "ShintoUsers",
-  
+shintoUser <- R6::R6Class(classname = "ShintoUsers", 
+                          inherit = shintodb::databaseClass,
+                          lock_objects = FALSE,
   
   public = list(
     
@@ -45,7 +46,6 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @return A 'shintousers' R6 object
     initialize = function(dbusername = NULL, 
                           dbname = NULL,
-                          schema = "shintousers",
                           userid = NULL, 
                           appname = "", 
                           appversion = "",
@@ -54,20 +54,12 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       
       if(!is.null(dbusername) | !is.null(dbname)){
-        message("Arguments 'dbusername' and 'dbname' to shintousers are now ignored! Are both 'shintousers' in conf/config.yml")
+        message("Arguments 'dbusername' and 'dbname' to shintousers are now ignored! Both should be 'shintousers' in conf/config.yml")
       }
       
-      self$schema <- schema
-      
-      if(is.null(con)){
-        self$con <- shintodb::connect("shintousers")
-      } else {
-        self$con <- con
-      }
-      
+      super$initialize(what = "shintousers", schema = "shintousers", db_connection = con, pool = FALSE)
       
       self$userid <- userid
-      
       self$appname <- appname
       self$appversion <- appversion
       
@@ -85,66 +77,18 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       jsonlite::fromJSON(txt)
     },
     
-    
-    #' @description Close the DB connection
-    close = function(){
+    #' @description Read attribute 'naam' for a user (default = current user)
+    get_name = function(userid = NULL, appname = NULL){
       
-      DBI::dbDisconnect(self$con)
+      if(is.null(userid))userid <- self$userid
       
-    },
-    
-    #' @description Do a `dbGetQuery` on the `shintousers` DB (accepts glue)
-    #' @param txt Query string
-    #' @param glue If true, attempts to 'glue'
-    query = function(txt, glue = TRUE){
+      out <- self$get_user_attributes(userid, appname)
       
-      if(glue)txt <- glue::glue(txt)
-      
-      try(
-        DBI::dbGetQuery(self$con, txt)
-      )
-      
-    },
-    
-    #' @description Do a `dbExecute` on the `shintousers` DB (accepts glue)
-    #' @param txt Query string
-    #' @param glue If true, attempts to 'glue'
-    execute_query = function(txt, glue = TRUE){
-      
-      if(glue)txt <- glue::glue(txt)
-      
-      try(
-        DBI::dbExecute(self$con, txt)
-      )
-      
-    },
-    
-    #' @description `dbWriteTable(..., append = TRUE)`
-    #' @param table table name (without schema)
-    #' @param data dataframe
-    append_data = function(table, data){
-      
-      try(
-        DBI::dbWriteTable(self$con,
-                     DBI::Id(schema = self$schema, table = table),
-                     value = data,
-                     append = TRUE)
-      )
-      
-    },
-    
-    #' @description Read a table (from the default schema)
-    #' @param table table name (without schema)
-    #' @param lazy If true, returns a 'lazy table' (dbplyr)
-    read_table = function(table, lazy = FALSE){
-      
-      out <- dplyr::tbl(self$con, dbplyr::in_schema(self$schema, table))
-      
-      if(!lazy){
-        out <- dplyr::collect(out)
+      if(all(is.na(out))){
+        return(userid)
       }
       
-      out
+      self$from_json(out)$naam
       
     },
     
@@ -227,6 +171,86 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
     },
     
+    #' @description List users for an app
+    #' @param appname rsconnect application name
+    list_application_users = function(appname = NULL,
+                                      roles = NULL, 
+                                      groups = NULL, 
+                                      ignore_groups = NULL,
+                                      by_group = FALSE){
+      
+      
+      if(is.null(appname))appname <- self$appname
+      
+      data <- self$read_table("roles", lazy = TRUE) %>%
+        filter(appname == !!appname) %>%
+        collect
+      
+      data[["username"]] <- sapply(data[["attributes"]], function(x){
+        
+        if(all(is.na(x)))return(NA_character_)
+        self$from_json(x)$naam
+        
+      }, USE.NAMES = FALSE)
+      
+      data <- dplyr::arrange(data, username) %>% 
+        dplyr::select(userid, username, groep, role)
+      
+      if(!is.null(groups)){
+        data <- filter(data, 
+                       grepl(paste(groups,collapse="|"), groep))  
+      }
+      
+      if(!is.null(ignore_groups)){
+        
+        data <- filter(data, 
+                       grepl(paste(ignore_groups,collapse="|"), groep))  
+        
+      }
+      
+      if(by_group){
+        
+        all_groups <- unique(do.call(c, lapply(data$groep, self$from_json)))
+        
+        data <- lapply(all_groups, function(g){
+          filter(data, grepl(g, groep))
+        })
+        
+        names(data) <- all_groups        
+        
+      }
+
+      return(data)
+      
+    },
+    
+    #' @description Set attributes for a user
+    #' @param userid rsconnect username (can be NULL, uses userid on init)
+    #' @param appname rsconnect application name
+    #' @param attributes a list
+    set_user_attributes = function(userid, appname, attributes = list()){
+      
+      atr_json <- self$to_json(attributes)
+      
+      query <- glue::glue("UPDATE {self$schema}.roles SET attributes = '{atr_json}' ",
+                          "WHERE userid = '{userid}' and appname = '{appname}'")
+      
+      self$execute_query(query)
+    },
+    
+    #' @description Get attributes for a user
+    #' @param userid rsconnect username (can be NULL, uses userid on init)
+    #' @param appname rsconnect application name
+    get_user_attributes = function(userid, appname){
+      
+      out <- self$query(glue::glue("select attributes from {self$schema}.roles where userid = '{userid}' and appname = '{appname}'"))
+      
+      if(nrow(out) == 0){
+        return(NULL)
+      }
+      
+      out[[1]]
+    },
     
     #' @description Gets the role for the current user (admin or viewer, typically)
     #' @param userid rsconnect username (can be NULL, uses userid on init)

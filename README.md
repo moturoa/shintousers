@@ -2,6 +2,9 @@
 # shintousers: an R package for user role methods
 
 
+See [shintousers app](https://bitbucket.org/shintolabs/shintousers_app) for more information
+
+
 ## Installation
 
 

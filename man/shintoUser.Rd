@@ -10,6 +10,9 @@ Returns (invisibly) the last login information
 Make a database connection to 'shintousers' and access all kinds of 
 methods for user management. In Shiny apps, use `get_and_set_last_login`, for example.
 }
+\section{Super class}{
+\code{shintodb::NA} -> \code{ShintoUsers}
+}
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
@@ -33,15 +36,14 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoUsers-new}{\code{shintoUser$new()}}
 \item \href{#method-ShintoUsers-to_json}{\code{shintoUser$to_json()}}
 \item \href{#method-ShintoUsers-from_json}{\code{shintoUser$from_json()}}
-\item \href{#method-ShintoUsers-close}{\code{shintoUser$close()}}
-\item \href{#method-ShintoUsers-query}{\code{shintoUser$query()}}
-\item \href{#method-ShintoUsers-execute_query}{\code{shintoUser$execute_query()}}
-\item \href{#method-ShintoUsers-append_data}{\code{shintoUser$append_data()}}
-\item \href{#method-ShintoUsers-read_table}{\code{shintoUser$read_table()}}
+\item \href{#method-ShintoUsers-get_name}{\code{shintoUser$get_name()}}
 \item \href{#method-ShintoUsers-get_last_login}{\code{shintoUser$get_last_login()}}
 \item \href{#method-ShintoUsers-set_last_login}{\code{shintoUser$set_last_login()}}
 \item \href{#method-ShintoUsers-get_and_set_last_login}{\code{shintoUser$get_and_set_last_login()}}
 \item \href{#method-ShintoUsers-app_has_user}{\code{shintoUser$app_has_user()}}
+\item \href{#method-ShintoUsers-list_application_users}{\code{shintoUser$list_application_users()}}
+\item \href{#method-ShintoUsers-set_user_attributes}{\code{shintoUser$set_user_attributes()}}
+\item \href{#method-ShintoUsers-get_user_attributes}{\code{shintoUser$get_user_attributes()}}
 \item \href{#method-ShintoUsers-get_role}{\code{shintoUser$get_role()}}
 \item \href{#method-ShintoUsers-set_role}{\code{shintoUser$set_role()}}
 \item \href{#method-ShintoUsers-get_group}{\code{shintoUser$get_group()}}
@@ -60,6 +62,31 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoUsers-clone}{\code{shintoUser$clone()}}
 }
 }
+\if{html}{\out{
+<details><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="append_data"><a href='../../shintodb/html/NA.html#method-NA-append_data'><code>shintodb::NA$append_data()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="close"><a href='../../shintodb/html/NA.html#method-NA-close'><code>shintodb::NA$close()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="connect_to_database"><a href='../../shintodb/html/NA.html#method-NA-connect_to_database'><code>shintodb::NA$connect_to_database()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="delete_rows_where"><a href='../../shintodb/html/NA.html#method-NA-delete_rows_where'><code>shintodb::NA$delete_rows_where()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="execute_query"><a href='../../shintodb/html/NA.html#method-NA-execute_query'><code>shintodb::NA$execute_query()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="get_query"><a href='../../shintodb/html/NA.html#method-NA-get_query'><code>shintodb::NA$get_query()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="has_value"><a href='../../shintodb/html/NA.html#method-NA-has_value'><code>shintodb::NA$has_value()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="have_column"><a href='../../shintodb/html/NA.html#method-NA-have_column'><code>shintodb::NA$have_column()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="list_tables"><a href='../../shintodb/html/NA.html#method-NA-list_tables'><code>shintodb::NA$list_tables()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="make_column"><a href='../../shintodb/html/NA.html#method-NA-make_column'><code>shintodb::NA$make_column()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="postgres_now"><a href='../../shintodb/html/NA.html#method-NA-postgres_now'><code>shintodb::NA$postgres_now()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="query"><a href='../../shintodb/html/NA.html#method-NA-query'><code>shintodb::NA$query()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="read_table"><a href='../../shintodb/html/NA.html#method-NA-read_table'><code>shintodb::NA$read_table()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="replace_value_where"><a href='../../shintodb/html/NA.html#method-NA-replace_value_where'><code>shintodb::NA$replace_value_where()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="replace_value_where2"><a href='../../shintodb/html/NA.html#method-NA-replace_value_where2'><code>shintodb::NA$replace_value_where2()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="table_columns"><a href='../../shintodb/html/NA.html#method-NA-table_columns'><code>shintodb::NA$table_columns()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="table_info"><a href='../../shintodb/html/NA.html#method-NA-table_info'><code>shintodb::NA$table_info()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="update_where"><a href='../../shintodb/html/NA.html#method-NA-update_where'><code>shintodb::NA$update_where()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="write_table_overwrite"><a href='../../shintodb/html/NA.html#method-NA-write_table_overwrite'><code>shintodb::NA$write_table_overwrite()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoUsers-new"></a>}}
 \if{latex}{\out{\hypertarget{method-ShintoUsers-new}{}}}
@@ -69,7 +96,6 @@ Make new shintousers object
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$new(
   dbusername = NULL,
   dbname = NULL,
-  schema = "shintousers",
   userid = NULL,
   appname = "",
   appversion = "",
@@ -85,8 +111,6 @@ Make new shintousers object
 
 \item{\code{dbname}}{Name of database (usually 'shintousers')}
 
-\item{\code{schema}}{Database schema with tables 'roles', 'users', 'logins'}
-
 \item{\code{userid}}{rsconnect username, if not NULL it is stored and used for all methods (handy inside an app)}
 
 \item{\code{appname}}{rsconnect application name}
@@ -96,6 +120,8 @@ Make new shintousers object
 \item{\code{con}}{Optional, existing database connection to shintousers (for recycling)}
 
 \item{\code{...}}{Further arguments passed to [users_db_connection()]}
+
+\item{\code{schema}}{Database schema with tables 'roles', 'users', 'logins'}
 }
 \if{html}{\out{</div>}}
 }
@@ -138,90 +164,14 @@ Convert to JSON
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoUsers-close"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoUsers-close}{}}}
-\subsection{Method \code{close()}}{
-Close the DB connection
+\if{html}{\out{<a id="method-ShintoUsers-get_name"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-get_name}{}}}
+\subsection{Method \code{get_name()}}{
+Read attribute 'naam' for a user (default = current user)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$close()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_name(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoUsers-query"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoUsers-query}{}}}
-\subsection{Method \code{query()}}{
-Do a `dbGetQuery` on the `shintousers` DB (accepts glue)
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$query(txt, glue = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{txt}}{Query string}
-
-\item{\code{glue}}{If true, attempts to 'glue'}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoUsers-execute_query"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoUsers-execute_query}{}}}
-\subsection{Method \code{execute_query()}}{
-Do a `dbExecute` on the `shintousers` DB (accepts glue)
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$execute_query(txt, glue = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{txt}}{Query string}
-
-\item{\code{glue}}{If true, attempts to 'glue'}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoUsers-append_data"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoUsers-append_data}{}}}
-\subsection{Method \code{append_data()}}{
-`dbWriteTable(..., append = TRUE)`
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$append_data(table, data)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{table}}{table name (without schema)}
-
-\item{\code{data}}{dataframe}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoUsers-read_table"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoUsers-read_table}{}}}
-\subsection{Method \code{read_table()}}{
-Read a table (from the default schema)
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$read_table(table, lazy = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{table}}{table name (without schema)}
-
-\item{\code{lazy}}{If true, returns a 'lazy table' (dbplyr)}
-}
-\if{html}{\out{</div>}}
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoUsers-get_last_login"></a>}}
@@ -307,6 +257,69 @@ otherwise updates the last login.
 Does an app have a user configured?
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$app_has_user(userid, appname)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+
+\item{\code{appname}}{rsconnect application name}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-list_application_users"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-list_application_users}{}}}
+\subsection{Method \code{list_application_users()}}{
+List users for an app
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$list_application_users(
+  appname = NULL,
+  roles = NULL,
+  groups = NULL,
+  ignore_groups = NULL,
+  by_group = FALSE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{appname}}{rsconnect application name}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-set_user_attributes"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-set_user_attributes}{}}}
+\subsection{Method \code{set_user_attributes()}}{
+Set attributes for a user
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$set_user_attributes(userid, appname, attributes = list())}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+
+\item{\code{appname}}{rsconnect application name}
+
+\item{\code{attributes}}{a list}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-get_user_attributes"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-get_user_attributes}{}}}
+\subsection{Method \code{get_user_attributes()}}{
+Get attributes for a user
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_user_attributes(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
