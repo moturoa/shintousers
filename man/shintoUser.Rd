@@ -483,7 +483,7 @@ Does the current user have a role? `$has_role("admin")` --> bool
 \subsection{Method \code{add_application()}}{
 Add an application to the list of applications
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$add_application(appname, roles, groups, comment = "")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$add_application(appname, roles, groups = list(), comment = "")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

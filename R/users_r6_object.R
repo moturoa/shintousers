@@ -2,7 +2,7 @@
 #' A User object for use in Shinto apps
 #' @description Make a database connection to 'shintousers' and access all kinds of 
 #' methods for user management. In Shiny apps, use `get_and_set_last_login`, for example.
-#' @importFrom dplyr tbl collect 
+#' @importFrom dplyr tbl collect select filter arrange
 #' @importFrom DBI dbDisconnect dbConnect dbGetQuery dbExecute dbWriteTable Id
 #' @importFrom glue glue
 #' @importFrom jsonlite toJSON
@@ -182,9 +182,9 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       if(is.null(appname))appname <- self$appname
       
-      data <- self$read_table("roles", lazy = TRUE) %>%
-        filter(appname == !!appname) %>%
-        collect
+      data <- self$read_table("roles", lazy = TRUE) |>
+        filter(appname == !!appname) |>
+        collect()
       
       data[["username"]] <- sapply(data[["attributes"]], function(x){
         
@@ -193,18 +193,18 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         
       }, USE.NAMES = FALSE)
       
-      data <- dplyr::arrange(data, username) %>% 
+      data <- dplyr::arrange(data, username) |>
         dplyr::select(userid, username, groep, role)
       
       if(!is.null(groups)){
-        data <- filter(data, 
+        data <- dplyr::filter(data, 
                        grepl(paste(groups,collapse="|"), groep))  
       }
       
       if(!is.null(ignore_groups)){
         
-        data <- filter(data, 
-                       grepl(paste(ignore_groups,collapse="|"), groep))  
+        data <- dplyr::filter(data, 
+                       !grepl(paste(ignore_groups,collapse="|"), groep))  
         
       }
       
@@ -213,7 +213,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         all_groups <- unique(do.call(c, lapply(data$groep, self$from_json)))
         
         data <- lapply(all_groups, function(g){
-          filter(data, grepl(g, groep))
+          dplyr::filter(data, grepl(g, groep))
         })
         
         names(data) <- all_groups        
@@ -380,7 +380,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param appname The rsconnect application name
     #' @param groups The choices for application groups, can be anything
     #' @param comment Any other text (unused as of 11/2022)
-    add_application = function(appname, roles, groups, comment = ""){
+    add_application = function(appname, roles, groups = list(), comment = ""){
       
       data <- tibble::tibble(
         appname = appname,
