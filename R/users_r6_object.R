@@ -49,6 +49,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                           userid = NULL, 
                           appname = "", 
                           appversion = "",
+                          default_user = "unknown",
                           con = NULL,
                           ...){
       
@@ -59,11 +60,27 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       super$initialize(what = "shintousers", schema = "shintousers", db_connection = con, pool = FALSE)
       
+      if(is.null(userid)){
+        userid <- self$get_shiny_user(default = default_user)
+      }
+      
       self$userid <- userid
       self$appname <- appname
       self$appversion <- appversion
       
     },
+    
+    #' @description Get current shiny user    
+    get_shiny_user = function (default, session = shiny::getDefaultReactiveDomain()){
+      
+      if(!shiny::isRunning() || is.null(session$user)){
+        default
+      } else {
+        session$user
+      }
+      
+    },
+
     
     #' @description Convert to JSON 
     #' @param x An object to convert to JSON
@@ -80,15 +97,24 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @description Read attribute 'naam' for a user (default = current user)
     get_name = function(userid = NULL, appname = NULL){
       
+      if(is.null(appname))appname <- self$appname
       if(is.null(userid))userid <- self$userid
       
       out <- self$get_user_attributes(userid, appname)
       
-      if(all(is.na(out))){
-        return(userid)
-      }
+      out$naam <- sapply(out$attributes, function(x){
+        if(is.na(x)){
+          NA_character_
+        } else {
+          jsonlite::fromJSON(x)$naam
+        }
+      }, USE.NAMES = FALSE)
       
-      self$from_json(out)$naam
+      out$naam[is.na(out$naam)] <- out$userid[is.na(out$naam)]
+      
+      
+      ii <- match(userid, out$userid)
+      out$naam[ii]
       
     },
     
@@ -243,13 +269,16 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param appname rsconnect application name
     get_user_attributes = function(userid, appname){
       
-      out <- self$query(glue::glue("select attributes from {self$schema}.roles where userid = '{userid}' and appname = '{appname}'"))
+      out <- self$read_table("roles", lazy = TRUE) %>%
+        filter(userid %in% !!userid, appname == !!appname) %>%
+        select(userid, attributes) %>%
+        collect
       
       if(nrow(out) == 0){
         return(NULL)
       }
       
-      out[[1]]
+      out
     },
     
     #' @description Gets the role for the current user (admin or viewer, typically)

@@ -34,6 +34,7 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ShintoUsers-new}{\code{shintoUser$new()}}
+\item \href{#method-ShintoUsers-get_shiny_user}{\code{shintoUser$get_shiny_user()}}
 \item \href{#method-ShintoUsers-to_json}{\code{shintoUser$to_json()}}
 \item \href{#method-ShintoUsers-from_json}{\code{shintoUser$from_json()}}
 \item \href{#method-ShintoUsers-get_name}{\code{shintoUser$get_name()}}
@@ -99,6 +100,7 @@ Make new shintousers object
   userid = NULL,
   appname = "",
   appversion = "",
+  default_user = "unknown",
   con = NULL,
   ...
 )}\if{html}{\out{</div>}}
@@ -128,6 +130,16 @@ Make new shintousers object
 \subsection{Returns}{
 A 'shintousers' R6 object
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-get_shiny_user"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-get_shiny_user}{}}}
+\subsection{Method \code{get_shiny_user()}}{
+Get current shiny user
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_shiny_user(default, session = shiny::getDefaultReactiveDomain())}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoUsers-to_json"></a>}}
