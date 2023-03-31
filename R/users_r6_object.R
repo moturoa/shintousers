@@ -41,8 +41,9 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param userid rsconnect username, if not NULL it is stored and used for all methods (handy inside an app)
     #' @param appname rsconnect application name
     #' @param appversion Optional, application version string
+    #' @param pool Passed to [shintodb::connect()]
     #' @param con Optional, existing database connection to shintousers (for recycling)
-    #' @param ... Further arguments passed to [users_db_connection()]
+    #' @param ... Further arguments passed to [shintodb::connect()]
     #' @return A 'shintousers' R6 object
     initialize = function(dbusername = NULL, 
                           dbname = NULL,
@@ -51,6 +52,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                           appversion = "",
                           default_user = "unknown",
                           con = NULL,
+                          pool = FALSE,
                           ...){
       
       
@@ -58,7 +60,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         message("Arguments 'dbusername' and 'dbname' to shintousers are now ignored! Both should be 'shintousers' in conf/config.yml")
       }
       
-      super$initialize(what = "shintousers", schema = "shintousers", db_connection = con, pool = FALSE)
+      super$initialize(what = "shintousers", schema = "shintousers", db_connection = con, pool = pool, ...)
       
       if(is.null(userid)){
         userid <- self$get_shiny_user(default = default_user)
@@ -95,6 +97,8 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     },
     
     #' @description Read attribute 'naam' for a user (default = current user)
+    #' @param userid Vector of user ID's
+    #' @param appname Application name (can be NULL, appname on init is then used)
     get_name = function(userid = NULL, appname = NULL){
       
       if(is.null(appname))appname <- self$appname
@@ -114,8 +118,9 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       
       ii <- match(userid, out$userid)
-      out$naam[ii]
-      
+      out_names <- out$naam[ii]
+      out_names[is.na(out_names)] <- userid[is.na(out_names)]
+      out_names
     },
     
     #' @description Get last login for this user for this application (reads `shintousers.logins`)
@@ -212,15 +217,14 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         filter(appname == !!appname) |>
         collect()
       
-      data[["username"]] <- sapply(data[["attributes"]], function(x){
-        
-        if(all(is.na(x)))return(NA_character_)
-        self$from_json(x)$naam
-        
-      }, USE.NAMES = FALSE)
+      data[["username"]] <- self$get_name(data[["userid"]])
       
       data <- dplyr::arrange(data, username) |>
         dplyr::select(userid, username, groep, role)
+      
+      if(!is.null(roles)){
+        data <- dplyr::filter(data, role %in% !!roles)
+      }
       
       if(!is.null(groups)){
         data <- dplyr::filter(data, 
@@ -269,10 +273,10 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param appname rsconnect application name
     get_user_attributes = function(userid, appname){
       
-      out <- self$read_table("roles", lazy = TRUE) %>%
-        filter(userid %in% !!userid, appname == !!appname) %>%
-        select(userid, attributes) %>%
-        collect
+      out <- self$read_table("roles", lazy = TRUE) |>
+        filter(userid %in% !!userid, appname == !!appname) |>
+        select(userid, attributes) |>
+        collect()
       
       if(nrow(out) == 0){
         return(NULL)

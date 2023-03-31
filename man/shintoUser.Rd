@@ -184,6 +184,15 @@ Read attribute 'naam' for a user (default = current user)
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_name(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{userid}}{Vector of user ID's}
+
+\item{\code{appname}}{Application name (can be NULL, appname on init is then used)}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoUsers-get_last_login"></a>}}
