@@ -52,6 +52,7 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoUsers-set_group}{\code{shintoUser$set_group()}}
 \item \href{#method-ShintoUsers-remove_role}{\code{shintoUser$remove_role()}}
 \item \href{#method-ShintoUsers-has_role}{\code{shintoUser$has_role()}}
+\item \href{#method-ShintoUsers-is_admin}{\code{shintoUser$is_admin()}}
 \item \href{#method-ShintoUsers-add_application}{\code{shintoUser$add_application()}}
 \item \href{#method-ShintoUsers-set_application_roles}{\code{shintoUser$set_application_roles()}}
 \item \href{#method-ShintoUsers-set_application_groups}{\code{shintoUser$set_application_groups()}}
@@ -71,12 +72,15 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="connect_to_database"><a href='../../shintodb/html/NA.html#method-NA-connect_to_database'><code>shintodb::NA$connect_to_database()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="delete_rows_where"><a href='../../shintodb/html/NA.html#method-NA-delete_rows_where'><code>shintodb::NA$delete_rows_where()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="execute_query"><a href='../../shintodb/html/NA.html#method-NA-execute_query'><code>shintodb::NA$execute_query()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="filter"><a href='../../shintodb/html/NA.html#method-NA-filter'><code>shintodb::NA$filter()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="get_query"><a href='../../shintodb/html/NA.html#method-NA-get_query'><code>shintodb::NA$get_query()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="has_value"><a href='../../shintodb/html/NA.html#method-NA-has_value'><code>shintodb::NA$has_value()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="have_column"><a href='../../shintodb/html/NA.html#method-NA-have_column'><code>shintodb::NA$have_column()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="list_indexes"><a href='../../shintodb/html/NA.html#method-NA-list_indexes'><code>shintodb::NA$list_indexes()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="list_tables"><a href='../../shintodb/html/NA.html#method-NA-list_tables'><code>shintodb::NA$list_tables()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="make_column"><a href='../../shintodb/html/NA.html#method-NA-make_column'><code>shintodb::NA$make_column()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="postgres_now"><a href='../../shintodb/html/NA.html#method-NA-postgres_now'><code>shintodb::NA$postgres_now()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="postgres_now_in_local_time"><a href='../../shintodb/html/NA.html#method-NA-postgres_now_in_local_time'><code>shintodb::NA$postgres_now_in_local_time()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="query"><a href='../../shintodb/html/NA.html#method-NA-query'><code>shintodb::NA$query()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="read_table"><a href='../../shintodb/html/NA.html#method-NA-read_table'><code>shintodb::NA$read_table()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="shintodb" data-topic="NA" data-id="replace_value_where"><a href='../../shintodb/html/NA.html#method-NA-replace_value_where'><code>shintodb::NA$replace_value_where()</code></a></span></li>
@@ -95,13 +99,17 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 Make new shintousers object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$new(
-  dbusername = NULL,
-  dbname = NULL,
   userid = NULL,
   appname = "",
   appversion = "",
   default_user = "unknown",
+  groups = NULL,
+  ad_authentication = FALSE,
+  admin_group_pattern = "",
   con = NULL,
+  pool = FALSE,
+  dbusername = NULL,
+  dbname = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -109,10 +117,6 @@ Make new shintousers object
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dbusername}}{Username in database 'shintousers'}
-
-\item{\code{dbname}}{Name of database (usually 'shintousers')}
-
 \item{\code{userid}}{rsconnect username, if not NULL it is stored and used for all methods (handy inside an app)}
 
 \item{\code{appname}}{rsconnect application name}
@@ -121,7 +125,13 @@ Make new shintousers object
 
 \item{\code{con}}{Optional, existing database connection to shintousers (for recycling)}
 
-\item{\code{...}}{Further arguments passed to [users_db_connection()]}
+\item{\code{pool}}{Passed to [shintodb::connect()]}
+
+\item{\code{dbusername}}{ignored ("shintousers")}
+
+\item{\code{dbname}}{ignored ("shintousers")}
+
+\item{\code{...}}{Further arguments passed to [shintodb::connect()]}
 
 \item{\code{schema}}{Database schema with tables 'roles', 'users', 'logins'}
 }
@@ -497,6 +507,16 @@ Does the current user have a role? `$has_role("admin")` --> bool
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-is_admin"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-is_admin}{}}}
+\subsection{Method \code{is_admin()}}{
+Better alternative to 'has_role("admin")' for use with AD
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$is_admin()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoUsers-add_application"></a>}}

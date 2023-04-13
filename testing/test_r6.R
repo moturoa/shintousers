@@ -1,9 +1,11 @@
 
 devtools::load_all()
 
-cfg_file <- "c:/repos/wbm3.0/conf/config.yml"
-
 #Sys.setenv(R_CONFIG_ACTIVE = "productionlocal")
+
+
+
+cfg_file <- "c:/repos/wbm3.0/conf/config.yml"
 
 .user <- shintoUser$new(userid = "apollo_dev",
                         appname = "demo_apollo",
@@ -23,6 +25,8 @@ cfg_file <- "c:/repos/wbm3.0/conf/config.yml"
 
 .user$list_indexes()
 
+
+.user$filter("logins", appname == "demo_apollo", appversion == "1.2.2")
 
 
 

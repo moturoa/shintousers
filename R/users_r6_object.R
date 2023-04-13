@@ -35,24 +35,30 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     appversion = NULL,
     
     #' @description Make new shintousers object
-    #' @param dbusername Username in database 'shintousers' 
-    #' @param dbname Name of database (usually 'shintousers')
     #' @param schema Database schema with tables 'roles', 'users', 'logins'
     #' @param userid rsconnect username, if not NULL it is stored and used for all methods (handy inside an app)
     #' @param appname rsconnect application name
     #' @param appversion Optional, application version string
     #' @param pool Passed to [shintodb::connect()]
+    #' @param dbusername ignored ("shintousers")
+    #' @param dbname ignored ("shintousers")
     #' @param con Optional, existing database connection to shintousers (for recycling)
     #' @param ... Further arguments passed to [shintodb::connect()]
     #' @return A 'shintousers' R6 object
-    initialize = function(dbusername = NULL, 
-                          dbname = NULL,
-                          userid = NULL, 
+    initialize = function(userid = NULL, 
                           appname = "", 
                           appversion = "",
                           default_user = "unknown",
+                          groups = NULL,
+                          ad_authentication = FALSE,
+                          admin_group_pattern = "",
+                          
                           con = NULL,
                           pool = FALSE,
+                          
+                          dbusername = NULL, # ignored
+                          dbname = NULL,  # ignored
+                          
                           ...){
       
       
@@ -69,6 +75,10 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       self$userid <- userid
       self$appname <- appname
       self$appversion <- appversion
+      
+      self$groups <- groups
+      self$ad_authentication <- ad_authentication
+      self$admin_group_pattern <- admin_group_pattern
       
     },
     
@@ -402,8 +412,24 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param role The user role, typically 'admin', 'viewer'
     has_role = function(role){
       
-      roles <- self$get_role()
-      isTRUE(as.character(role) %in% as.character(roles))
+      if(role == "admin" && self$ad_authentication){
+        self$is_admin()
+      } else {
+        roles <- self$get_role()
+        isTRUE(as.character(role) %in% as.character(roles))  
+      }
+      
+    },
+    
+    #' @description Better alternative to 'has_role("admin")' for use with AD
+    is_admin = function(){
+      
+      if(!self$ad_authentication){
+        self$has_role("admin")
+      } else {
+        # search for admin group pattern (e.g. 'Beheerders$')
+        any(grepl(self$admin_group_pattern, self$groups))
+      }
       
     },
     
