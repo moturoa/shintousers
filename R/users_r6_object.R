@@ -49,7 +49,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                           appname = "", 
                           appversion = "",
                           default_user = "unknown",
-                          groups = NULL,
+                          ad_groups = NULL,
                           ad_authentication = FALSE,
                           admin_group_pattern = "",
                           
@@ -76,7 +76,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       self$appname <- appname
       self$appversion <- appversion
       
-      self$groups <- groups
+      self$ad_groups <- ad_groups
       self$ad_authentication <- ad_authentication
       self$admin_group_pattern <- admin_group_pattern
       
@@ -428,7 +428,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         self$has_role("admin")
       } else {
         # search for admin group pattern (e.g. 'Beheerders$')
-        any(grepl(self$admin_group_pattern, self$groups))
+        any(grepl(self$admin_group_pattern, self$ad_groups))
       }
       
     },
