@@ -103,7 +103,7 @@ Make new shintousers object
   appname = "",
   appversion = "",
   default_user = "unknown",
-  groups = NULL,
+  ad_groups = NULL,
   ad_authentication = FALSE,
   admin_group_pattern = "",
   con = NULL,

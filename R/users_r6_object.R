@@ -428,7 +428,8 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         self$has_role("admin")
       } else {
         # search for admin group pattern (e.g. 'Beheerders$')
-        any(grepl(self$admin_group_pattern, self$ad_groups))
+        pat <- paste(self$admin_group_pattern, collapse="|")
+        any(grepl(pat, self$ad_groups))
       }
       
     },
