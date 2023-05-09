@@ -47,6 +47,9 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoUsers-get_user_attributes}{\code{shintoUser$get_user_attributes()}}
 \item \href{#method-ShintoUsers-get_role}{\code{shintoUser$get_role()}}
 \item \href{#method-ShintoUsers-set_role}{\code{shintoUser$set_role()}}
+\item \href{#method-ShintoUsers-set_user_active_inactive}{\code{shintoUser$set_user_active_inactive()}}
+\item \href{#method-ShintoUsers-disable_user}{\code{shintoUser$disable_user()}}
+\item \href{#method-ShintoUsers-enable_user}{\code{shintoUser$enable_user()}}
 \item \href{#method-ShintoUsers-get_group}{\code{shintoUser$get_group()}}
 \item \href{#method-ShintoUsers-is_in_group}{\code{shintoUser$is_in_group()}}
 \item \href{#method-ShintoUsers-set_group}{\code{shintoUser$set_group()}}
@@ -310,6 +313,7 @@ List users for an app
   appname = NULL,
   roles = NULL,
   groups = NULL,
+  active_only = TRUE,
   ignore_groups = NULL,
   by_group = FALSE
 )}\if{html}{\out{</div>}}
@@ -329,7 +333,12 @@ List users for an app
 \subsection{Method \code{set_user_attributes()}}{
 Set attributes for a user
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoUser$set_user_attributes(userid, appname, attributes = list())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$set_user_attributes(
+  userid,
+  appname,
+  attributes = list(),
+  active = TRUE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -404,6 +413,37 @@ Sets the role for a user.
 }
 \subsection{Details}{
 !! Do not use in shiny applications (except shintousers_app) !!
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-set_user_active_inactive"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-set_user_active_inactive}{}}}
+\subsection{Method \code{set_user_active_inactive()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$set_user_active_inactive(
+  userid,
+  appname,
+  what = c("active", "inactive")
+)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-disable_user"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-disable_user}{}}}
+\subsection{Method \code{disable_user()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$disable_user(userid, appname)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoUsers-enable_user"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoUsers-enable_user}{}}}
+\subsection{Method \code{enable_user()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoUser$enable_user(userid, appname)}\if{html}{\out{</div>}}
 }
 
 }

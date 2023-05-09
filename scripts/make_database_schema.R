@@ -15,38 +15,13 @@ library(DBI)
 library(RPostgres)
 library(dplyr)
 
+.db <- shintodb::databaseClass$new(what = "shintousers", schema = "shintousers")
+
+
 con <- shintodb::connect("shintousers")
 
-# Make tables
-dbExecute(con, "create table if not exists logins (
-                  timestamp varchar,
-                  userid varchar,
-                  appname varchar)")
-
-
-dbExecute(con, "create table if not exists roles (
-                  userid varchar,
-                  appname varchar,
-                  role varchar,
-                  comment varchar,
-                  attributes text,
-                  groep text
-          )")
-
-dbExecute(con, "create table if not exists applications (
-                  appname varchar,
-                  roles json,
-                  comment varchar
-          )")
-
-dbExecute(con, "create table if not exists timings (
-                  appname varchar,
-                  key varchar,
-                  value double precision,
-                  userid varchar,
-                  timestamp timestamp without time zone default current_timestamp
-          )")
-
+# modify
+dbExecute(con, "alter table shintousers.roles add column active boolean default true")
 
 
 

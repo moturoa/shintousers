@@ -120,12 +120,13 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         if(is.na(x)){
           NA_character_
         } else {
-          jsonlite::fromJSON(x)$naam
+          j <- jsonlite::fromJSON(x)$naam
+          if(j == "")j <- NA_character_
+          j
         }
       }, USE.NAMES = FALSE)
       
       out$naam[is.na(out$naam)] <- out$userid[is.na(out$naam)]
-      
       
       ii <- match(userid, out$userid)
       out_names <- out$naam[ii]
@@ -217,6 +218,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     list_application_users = function(appname = NULL,
                                       roles = NULL, 
                                       groups = NULL, 
+                                      active_only = TRUE,
                                       ignore_groups = NULL,
                                       by_group = FALSE){
       
@@ -230,7 +232,11 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       data[["username"]] <- self$get_name(data[["userid"]])
       
       data <- dplyr::arrange(data, username) |>
-        dplyr::select(userid, username, groep, role)
+        dplyr::select(userid, username, groep, role, active)
+      
+      if(active_only){
+        data <- dplyr::filter(data, active)
+      }
       
       if(!is.null(roles)){
         data <- dplyr::filter(data, role %in% !!roles)
@@ -268,11 +274,11 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param userid rsconnect username (can be NULL, uses userid on init)
     #' @param appname rsconnect application name
     #' @param attributes a list
-    set_user_attributes = function(userid, appname, attributes = list()){
+    set_user_attributes = function(userid, appname, attributes = list(), active = TRUE){
       
       atr_json <- self$to_json(attributes)
       
-      query <- glue::glue("UPDATE {self$schema}.roles SET attributes = '{atr_json}' ",
+      query <- glue::glue("UPDATE {self$schema}.roles SET attributes = '{atr_json}', active = {tolower(active)} ",
                           "WHERE userid = '{userid}' and appname = '{appname}'")
       
       self$execute_query(query)
@@ -285,7 +291,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       out <- self$read_table("roles", lazy = TRUE) |>
         filter(userid %in% !!userid, appname == !!appname) |>
-        select(userid, attributes) |>
+        select(userid, attributes, active) |>
         collect()
       
       if(nrow(out) == 0){
@@ -338,6 +344,37 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                                  WHERE userid = '{userid}' and appname = '{appname}'"))
         
       }
+      
+    },
+    
+    set_user_active_inactive = function(userid, appname, what = c("active","inactive")){
+      
+      what <- match.arg(what)
+      val <- what == "active"
+      
+      if(!self$app_has_user(userid, appname)){
+        
+        message("Tried to disable a non-existent user ($enable_disable_user in shintousers)")
+        return(NULL)
+        
+      } else {
+        
+        self$execute_query(glue::glue("UPDATE {self$schema}.roles SET active = {tolower(val)} 
+                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+        
+      }
+      
+    },
+    
+    disable_user = function(userid, appname){
+      
+      self$set_user_active_inactive(userid, appname, "inactive")
+      
+    },
+    
+    enable_user = function(userid, appname){
+      
+      self$set_user_active_inactive(userid, appname, "active")
       
     },
     
