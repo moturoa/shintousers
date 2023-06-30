@@ -28,6 +28,9 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @field userid The application (shiny) user name
     userid = NULL,
     
+    #' @field usergroups The groups the user belongs to
+    usergroup = NULL,
+    
     #' @field appname The (rsconnect) application name
     appname = NULL,
     
@@ -45,7 +48,8 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param con Optional, existing database connection to shintousers (for recycling)
     #' @param ... Further arguments passed to [shintodb::connect()]
     #' @return A 'shintousers' R6 object
-    initialize = function(userid = NULL, 
+    initialize = function(userid = NULL,
+                          usergroup = NULL,
                           appname = "", 
                           appversion = "",
                           default_user = "unknown",
@@ -72,9 +76,16 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         userid <- self$get_shiny_user(default = default_user)
       }
       
-      self$userid <- userid
+      self$userid <- userid 
       self$appname <- appname
       self$appversion <- appversion
+      
+      #set the current user group
+      if(is.null(usergroup)){
+        self$usergroup <- self$get_group(userid, appname) 
+      } else {
+        self$usergroup <- usergroup
+      }
       
       self$ad_groups <- ad_groups
       self$ad_authentication <- ad_authentication
