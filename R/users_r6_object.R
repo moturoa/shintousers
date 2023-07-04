@@ -62,7 +62,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                           
                           dbusername = NULL, # ignored
                           dbname = NULL,  # ignored
-                          
+                          parsegroup = TRUE,
                           ...){
       
       
@@ -82,7 +82,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       #set the current user group
       if(is.null(usergroup)){
-        self$usergroup <- self$get_group(userid, appname) 
+        self$usergroup <- self$get_group(userid, appname, parsegroup=parsegroup) 
       } else {
         self$usergroup <- usergroup
       }
@@ -392,7 +392,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @description Get groups that the current user belongs to. See also `is_in_group`
     #' @param userid rsconnect username (can be NULL, uses userid on init)
     #' @param appname rsconnect application name
-    get_group = function(userid = NULL, appname = NULL){
+    get_group = function(userid = NULL, appname = NULL, parsegroup=TRUE){
       
       if(is.null(userid))userid <- self$userid
       if(is.null(appname))appname <- self$appname
@@ -401,9 +401,15 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       if(nrow(out) == 0 || is.na(out$groep[1]) || out$groep == ""){
         return(NULL)
+      } else if(parsegroup){ 
+        parsed <- strsplit(jsonlite::fromJSON(out$groep), ":")
+        values <- sapply(parsed, `[`, 2)
+        names(values) <- sapply(parsed, `[`, 1)
+        as.list(values) 
+      } else {
+        jsonlite::fromJSON(out$groep)
       }
-      
-      jsonlite::fromJSON(out$groep)
+       
       
     },
     
