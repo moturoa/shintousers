@@ -154,6 +154,15 @@ Get current shiny user
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$get_shiny_user(default, session = shiny::getDefaultReactiveDomain())}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{default}}{Default user (returned if user is NULL)}
+
+\item{\code{session}}{Shiny session object (no need to set)}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoUsers-to_json"></a>}}
@@ -751,6 +760,15 @@ double precision value.
 \if{html}{\out{<div class="r">}}\preformatted{shintoUser$log_timing(key, timing)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{key}}{Key in database table}
+
+\item{\code{timing}}{Time in seconds}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoUsers-clone"></a>}}

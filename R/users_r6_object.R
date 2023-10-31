@@ -2,13 +2,11 @@
 #' A User object for use in Shinto apps
 #' @description Make a database connection to 'shintousers' and access all kinds of 
 #' methods for user management. In Shiny apps, use `get_and_set_last_login`, for example.
-#' @importFrom dplyr tbl collect select filter arrange
-#' @importFrom DBI dbDisconnect dbConnect dbGetQuery dbExecute dbWriteTable Id
+#' @importFrom dplyr collect select filter arrange
 #' @importFrom glue glue
 #' @importFrom jsonlite toJSON
-#' @importFrom tibble tibble
+#' @importFrom shiny getDefaultReactiveDomain isRunning
 #' @importFrom R6 R6Class
-#' @importFrom dbplyr in_schema
 #' @importFrom shintodb databaseClass
 #' @export
 shintoUser <- R6::R6Class(classname = "ShintoUsers", 
@@ -83,7 +81,9 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
     },
     
-    #' @description Get current shiny user    
+    #' @description Get current shiny user  
+    #' @param default Default user (returned if user is NULL)
+    #' @param session Shiny session object (no need to set)
     get_shiny_user = function (default, session = shiny::getDefaultReactiveDomain()){
       
       if(!shiny::isRunning() || is.null(session$user)){
@@ -188,7 +188,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       if(is.null(user_log)){
         self$append_data(
           "logins",
-          tibble::tibble(
+          data.frame(
               timestamp  = as.character(Sys.time()),
               userid = userid,
               appname = appname,
@@ -228,7 +228,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
       data <- self$read_table("roles", lazy = TRUE) |>
         filter(appname == !!appname) |>
-        collect()
+        dplyr::collect()
       
       data[["username"]] <- self$get_name(data[["userid"]])
       
@@ -331,7 +331,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
         
         self$append_data(
           "roles",
-          tibble::tibble(
+          data.frame(
             userid = userid,
             appname = appname,
             role = role,
@@ -430,7 +430,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
 
         self$append_data(
           "roles",
-          tibble::tibble(
+          data.frame(
             userid = userid,
             appname = appname,
             groep = group
@@ -490,7 +490,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param comment Any other text (unused as of 11/2022)
     add_application = function(appname, roles, groups = list(), comment = ""){
       
-      data <- tibble::tibble(
+      data <- data.frame(
         appname = appname,
         roles = jsonlite::toJSON(roles),
         groups = jsonlite::toJSON(groups),
