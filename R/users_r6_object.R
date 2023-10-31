@@ -9,6 +9,7 @@
 #' @importFrom tibble tibble
 #' @importFrom R6 R6Class
 #' @importFrom dbplyr in_schema
+#' @importFrom shintodb databaseClass
 #' @export
 shintoUser <- R6::R6Class(classname = "ShintoUsers", 
                           inherit = shintodb::databaseClass,
@@ -577,7 +578,8 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     
     #' @description Log a timing. Writes data to 'timings' table in shintousers, with appname, key and
     #' double precision value. 
-    #' @param 
+    #' @param key Key in database table
+    #' @param timing Time in seconds
     log_timing = function(key, timing){
       
       v_n <- try(as.numeric(timing))

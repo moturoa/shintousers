@@ -3,3 +3,6 @@ test/
 ^\.Rproj\.user$
 
 scripts/
+
+conf/
+testing/
