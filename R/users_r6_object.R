@@ -347,6 +347,10 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
     },
     
+    #' @description Make a user active or inactive (sets 'active' field in 'roles' table)
+    #' @param userid User ID
+    #' @param appname Application name
+    #' @param what Either 'active' or 'inactive'
     set_user_active_inactive = function(userid, appname, what = c("active","inactive")){
       
       what <- match.arg(what)
@@ -366,12 +370,18 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
       
     },
     
+    #' @description Make the user inactive for an app
+    #' @param userid User ID
+    #' @param appname Application name
     disable_user = function(userid, appname){
       
       self$set_user_active_inactive(userid, appname, "inactive")
       
     },
     
+    #' @description Make the user active for an app
+    #' @param userid User ID
+    #' @param appname Application name
     enable_user = function(userid, appname){
       
       self$set_user_active_inactive(userid, appname, "active")
