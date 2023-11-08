@@ -325,7 +325,8 @@ List users for an app
   groups = NULL,
   active_only = TRUE,
   ignore_groups = NULL,
-  by_group = FALSE
+  by_group = FALSE,
+  add_last_login = FALSE
 )}\if{html}{\out{</div>}}
 }
 

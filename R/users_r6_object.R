@@ -221,7 +221,8 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                                       groups = NULL, 
                                       active_only = TRUE,
                                       ignore_groups = NULL,
-                                      by_group = FALSE){
+                                      by_group = FALSE,
+                                      add_last_login = FALSE){
       
       
       if(is.null(appname))appname <- self$appname
@@ -254,6 +255,19 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
                        !grepl(paste(ignore_groups,collapse="|"), groep))  
         
       }
+      
+      if(add_last_login){
+        
+        last_logins <- self$read_table("logins", lazy = TRUE) %>%
+          dplyr::filter(appname == !!appname) %>%
+          dplyr::select(userid, last_login = timestamp) %>%
+          dplyr::collect() %>%
+          dplyr::distinct(userid, .keep_all = TRUE)
+        
+        data <- dplyr::left_join(data, last_logins, by = "userid")
+        
+      }
+      
       
       if(by_group){
         
