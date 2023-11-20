@@ -1,5 +1,5 @@
 ![](https://badgen.net/badge/shintolabs/utility/purple)
-# shintousers: an R package for user role methods
+# shintousers: an R package for user role management
 
 
 
