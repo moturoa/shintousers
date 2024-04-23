@@ -442,7 +442,11 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
 
       # if(is.null(group))return(NULL)
 
-      group <- self$to_json(group)
+      if(is.null(group)){
+        group <- ""
+      } else {
+        group <- self$to_json(group)
+      }
 
       if(!self$app_has_user(userid, appname)){
 
