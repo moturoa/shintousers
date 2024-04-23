@@ -2,9 +2,9 @@ Package: shintousers
 Type: Package
 Title: Methods for Shiny Apps Users
 Version: 1.3.2
-Author: Remko Duursma
+Author: Remko Duursma, Wesley Brants
 Imports: R6, glue, dplyr, jsonlite, shiny, shintodb
-Maintainer: Remko Duursma <remko@shintolabs.nl>
+Maintainer: Wesley Brants <wesley@shintolabs.nl>
 Description: Read last login for the app for this user, get roles for the app.
 License: CC0
 Encoding: UTF-8
