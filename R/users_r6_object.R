@@ -34,10 +34,13 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     appversion = NULL,
 
     #' @description Make new shintousers object
-    #' @param schema Database schema with tables 'roles', 'users', 'logins'
     #' @param userid rsconnect username, if not NULL it is stored and used for all methods (handy inside an app)
     #' @param appname rsconnect application name
     #' @param appversion Optional, application version string
+    #' @param default_user Optional, go-to username if nothing is filled in
+    #' @param ad_groups Optional, active directory-groups
+    #' @param ad_authentication Boolean that checks if active directory authentication has to be done
+    #' @param admin_group_pattern Optional pattern to see which groupnames are implicating admin users
     #' @param pool Passed to [shintodb::connect()]
     #' @param dbusername ignored ("shintousers")
     #' @param dbname ignored ("shintousers")
@@ -216,6 +219,12 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
 
     #' @description List users for an app
     #' @param appname rsconnect application name
+    #' @param roles rolnames to filter on
+    #' @param groups groupnames to filter on
+    #' @param active_only Boolean to show if only active accounts need to be shown
+    #' @param ignore_groups Specific groups to ignore in the result. For example, exclude developer accounts
+    #' @param by_group Boolean, show by group in result
+    #' @param add_last_login Boolean, also show when user has logged in last.
     list_application_users = function(appname = NULL,
                                       roles = NULL,
                                       groups = NULL,
@@ -289,6 +298,7 @@ shintoUser <- R6::R6Class(classname = "ShintoUsers",
     #' @param userid rsconnect username (can be NULL, uses userid on init)
     #' @param appname rsconnect application name
     #' @param attributes a list
+    #' @param active Boolean for filtering on certain status
     set_user_attributes = function(userid, appname, attributes = list(), active = TRUE){
 
       atr_json <- self$to_json(attributes)
