@@ -62,13 +62,8 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoMSALUser-remove_role}{\code{shintoMSALUser$remove_role()}}
 \item \href{#method-ShintoMSALUser-has_role}{\code{shintoMSALUser$has_role()}}
 \item \href{#method-ShintoMSALUser-is_admin}{\code{shintoMSALUser$is_admin()}}
-\item \href{#method-ShintoMSALUser-add_application}{\code{shintoMSALUser$add_application()}}
-\item \href{#method-ShintoMSALUser-set_application_roles}{\code{shintoMSALUser$set_application_roles()}}
-\item \href{#method-ShintoMSALUser-set_application_groups}{\code{shintoMSALUser$set_application_groups()}}
 \item \href{#method-ShintoMSALUser-get_application_roles}{\code{shintoMSALUser$get_application_roles()}}
 \item \href{#method-ShintoMSALUser-get_application_groups}{\code{shintoMSALUser$get_application_groups()}}
-\item \href{#method-ShintoMSALUser-get_applications}{\code{shintoMSALUser$get_applications()}}
-\item \href{#method-ShintoMSALUser-remove_application}{\code{shintoMSALUser$remove_application()}}
 \item \href{#method-ShintoMSALUser-log_timing}{\code{shintoMSALUser$log_timing()}}
 \item \href{#method-ShintoMSALUser-clone}{\code{shintoMSALUser$clone()}}
 }
@@ -732,79 +727,6 @@ Better alternative to 'has_role("admin")' for use with AD
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoMSALUser-add_application"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoMSALUser-add_application}{}}}
-\subsection{Method \code{add_application()}}{
-Add an application to the list of applications
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$add_application(appname, roles, groups = list(), comment = "")}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{appname}}{The rsconnect application name}
-
-\item{\code{roles}}{The choices for user roles, typically c('admin','viewer')}
-
-\item{\code{groups}}{The choices for application groups, can be anything}
-
-\item{\code{comment}}{Any other text (unused as of 11/2022)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-!! Do not use in shiny applications (except shintousers_app) !!
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoMSALUser-set_application_roles"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoMSALUser-set_application_roles}{}}}
-\subsection{Method \code{set_application_roles()}}{
-Set application available roles
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$set_application_roles(appname, roles)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{appname}}{The rsconnect application name}
-
-\item{\code{roles}}{The choices for user roles, typically c('admin','viewer')}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-!! Do not use in shiny applications (except shintousers_app) !!
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoMSALUser-set_application_groups"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoMSALUser-set_application_groups}{}}}
-\subsection{Method \code{set_application_groups()}}{
-Set groups available in an application
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$set_application_groups(appname, groups)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{appname}}{The rsconnect application name}
-
-\item{\code{groups}}{The choices for application groups, can be anything}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-!! Do not use in shiny applications (except shintousers_app) !!
-}
-
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoMSALUser-get_application_roles"></a>}}
 \if{latex}{\out{\hypertarget{method-ShintoMSALUser-get_application_roles}{}}}
 \subsection{Method \code{get_application_roles()}}{
@@ -832,41 +754,6 @@ Get available roles for an application
 Add an application to the list of applications
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_application_groups(appname)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{appname}}{The rsconnect application name}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-!! Do not use in shiny applications (except shintousers_app) !!
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoMSALUser-get_applications"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoMSALUser-get_applications}{}}}
-\subsection{Method \code{get_applications()}}{
-Get list of available applications
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_applications()}\if{html}{\out{</div>}}
-}
-
-\subsection{Details}{
-!! Do not use in shiny applications (except shintousers_app) !!
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoMSALUser-remove_application"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoMSALUser-remove_application}{}}}
-\subsection{Method \code{remove_application()}}{
-Remove an application
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$remove_application(appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

@@ -8,6 +8,7 @@
 #' @importFrom shiny getDefaultReactiveDomain isRunning
 #' @importFrom R6 R6Class
 #' @importFrom shintodb databaseClass
+#' @importFrom DBI ANSI sqlInterpolate
 #' @export
 shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                               inherit = shintodb::databaseClass,
@@ -153,8 +154,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   } else {
 
-                                    self$execute_query(glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET username = '{username}'
-                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+                                    qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET username = ?username
+                                 WHERE userid = ?userid and appname = ?appname") %>% as.character()
+
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 username = username,
+                                                                 userid = userid,
+                                                                 appname = appname)
+
+                                    self$execute_query(query)
 
                                   }
 
@@ -203,9 +212,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                     )
 
                                   } else {
+                                    qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET email = ?email
+                                 WHERE userid = ?userid and appname = ?appname") %>% as.character()
 
-                                    self$execute_query(glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET email = '{email}'
-                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 email = email,
+                                                                 userid = userid,
+                                                                 appname = appname)
+
+                                    self$execute_query(query)
 
                                   }
 
@@ -254,8 +270,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   } else {
 
-                                    self$execute_query(glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET comments = '{comments}'
-                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+                                    qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET comments = ?comments
+                                 WHERE userid = ?userid and appname = ?appname") %>% as.character()
+
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 comments = comments,
+                                                                 userid = userid,
+                                                                 appname = appname)
+
+                                    self$execute_query(query)
 
                                   }
 
@@ -271,8 +295,17 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   if(is.null(userid))userid <- self$userid
                                   if(is.null(appname))appname <- self$appname
 
-                                  out <- self$query(glue::glue("SELECT timestamp, appversion FROM {self$schema}.logins WHERE
-                                  userid = '{userid}' and appname = '{appname}'"))
+                                  qu <- glue::glue("SELECT timestamp, appversion FROM {self$schema}.logins WHERE
+                                  userid = ?userid and appname = ?appname") %>% as.character()
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               userid = userid,
+                                                               appname = appname)
+
+                                  out <- self$query(query)
+
+
 
                                   if(nrow(out) == 0)return(NULL)
                                   setNames(as.POSIXct(out$timestamp, tz = "UTC"), out$appversion)
@@ -290,8 +323,15 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   if(is.null(appname))appname <- self$appname
                                   if(is.null(appversion))appversion <- self$appversion
 
-                                  query <- glue::glue("UPDATE {self$schema}.logins SET timestamp = '{now}', appversion = '{appversion}' ",
-                                                      "WHERE userid = '{userid}' and appname = '{appname}'")
+                                  qu <- glue::glue("UPDATE {self$schema}.logins SET timestamp = ?now, appversion = ?appversion ",
+                                                   "WHERE userid = ?userid and appname = ?appname") %>% as.character()
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               now = now,
+                                                               appversion = appversion,
+                                                               userid = userid,
+                                                               appname = appname)
 
                                   self$execute_query(query)
 
@@ -337,7 +377,17 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname rsconnect application name
                                 app_has_user = function(userid, appname){
 
-                                  out <- self$query(glue::glue("select * from {self$schema}.shiny_msal_accounts where userid = '{userid}' and appname = '{appname}'"))
+                                  qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts
+                                                   where userid = ?userid and appname = ?appname") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               userid = userid,
+                                                               appname = appname)
+
+                                  out <- self$query(query)
+
                                   nrow(out) > 0
 
                                 },
@@ -431,15 +481,20 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                       data.frame(
                                         userid = userid,
                                         appname = appname,
-                                        active = tolower(active),
                                         attributes = atr_json
                                       )
                                     )
 
                                   } else {
 
-                                    query <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET attributes = '{atr_json}'",
-                                                        "WHERE userid = '{userid}' and appname = '{appname}'")
+                                    qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET attributes = ?atr_json",
+                                                     " WHERE userid = ?userid and appname = ?appname") %>% as.character()
+
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 atr_json = atr_json,
+                                                                 userid = userid,
+                                                                 appname = appname)
 
                                     self$execute_query(query)
 
@@ -473,7 +528,15 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   if(is.null(userid))userid <- self$userid
                                   if(is.null(appname))appname <- self$appname
 
-                                  out <- self$query(glue::glue("select role from {self$schema}.shiny_msal_accounts where userid = '{userid}' and appname = '{appname}'"))
+                                  qu <- glue::glue("select role from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               userid = userid,
+                                                               appname = appname)
+
+                                  out <- self$query(query)
 
                                   if(nrow(out) == 0){
                                     return(NULL)
@@ -502,8 +565,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   } else {
 
-                                    self$execute_query(glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET role = '{role}'
-                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+                                    qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET role = ?role
+                                 WHERE userid = ?userid and appname = ?appname") %>% as.character()
+
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 role = role,
+                                                                 userid = userid,
+                                                                 appname = appname)
+
+                                    self$execute_query(query)
 
                                   }
 
@@ -517,7 +588,15 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   if(is.null(userid))userid <- self$userid
                                   if(is.null(appname))appname <- self$appname
 
-                                  out <- self$query(glue::glue("select active from {self$schema}.shiny_msal_accounts where userid = '{userid}' and appname = '{appname}'"))
+                                  qu <- glue::glue("select active from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               userid = userid,
+                                                               appname = appname)
+
+                                  out <- self$query(query)
 
                                   if(nrow(out) == 0){
                                     return(NULL)
@@ -535,6 +614,7 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   what <- match.arg(what)
                                   val <- what == "active"
+                                  val <- tolower(val)
 
                                   if(!self$app_has_user(userid, appname)){
 
@@ -543,8 +623,17 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   } else {
 
-                                    self$execute_query(glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET active = {tolower(val)}
-                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+                                    qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET active = ?val
+                                 WHERE userid = ?userid and appname = ?appname") %>% as.character()
+
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 val = val,
+                                                                 userid = userid,
+                                                                 appname = appname)
+
+                                    self$execute_query(query)
+
 
                                   }
 
@@ -576,7 +665,15 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   if(is.null(userid))userid <- self$userid
                                   if(is.null(appname))appname <- self$appname
 
-                                  out <- self$query(glue::glue("select groups from {self$schema}.shiny_msal_accounts where userid = '{userid}' and appname = '{appname}'"))
+                                  qu <- glue::glue("select groups from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               userid = userid,
+                                                               appname = appname)
+
+                                  out <- self$query(query)
 
                                   if(nrow(out) == 0 || is.na(out$groups[1]) || out$groups == ""){
                                     return(NULL)
@@ -625,8 +722,17 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   } else {
 
-                                    self$execute_query(glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET groups = '{group}'
-                                 WHERE userid = '{userid}' and appname = '{appname}'"))
+                                    qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET groups = ?groups
+                                 WHERE userid = ?userid and appname = ?appname") %>% as.character()
+
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 groups = group,
+                                                                 userid = userid,
+                                                                 appname = appname)
+
+                                    self$execute_query(query)
+
 
                                   }
 
@@ -637,7 +743,14 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname rsconnect application name
                                 remove_role = function(userid, appname){
 
-                                  self$execute_query(glue::glue("delete from {self$schema}.shiny_msal_accounts where userid = '{userid}' and appname = '{appname}'"))
+                                  qu <- glue::glue("delete from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               userid = userid,
+                                                               appname = appname)
+
+                                  self$execute_query(query)
 
                                 },
 
@@ -667,58 +780,21 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 },
 
-                                #' @description Add an application to the list of applications
-                                #' @details !! Do not use in shiny applications (except shintousers_app) !!
-                                #' @param roles The choices for user roles, typically c('admin','viewer')
-                                #' @param appname The rsconnect application name
-                                #' @param groups The choices for application groups, can be anything
-                                #' @param comment Any other text (unused as of 11/2022)
-                                add_application = function(appname, roles, groups = list(), comment = ""){
 
-                                  data <- data.frame(
-                                    appname = appname,
-                                    roles = jsonlite::toJSON(roles),
-                                    groups = jsonlite::toJSON(groups),
-                                    comment = comment
-                                  )
-
-                                  out <- self$query(glue::glue("select * from {self$schema}.applications where appname = '{appname}'"))
-                                  d_exists <- nrow(out) > 0
-
-                                  if(!d_exists){
-                                    self$append_data("applications", data)
-                                  }
-
-                                },
-
-                                #' @description Set application available roles
-                                #' @details !! Do not use in shiny applications (except shintousers_app) !!
-                                #' @param roles The choices for user roles, typically c('admin','viewer')
-                                #' @param appname The rsconnect application name
-                                set_application_roles = function(appname, roles){
-
-                                  role_json <- self$to_json(roles)
-                                  self$execute_query(glue::glue("update {self$schema}.applications set roles = '{role_json}' where appname = '{appname}'"))
-
-                                },
-
-                                #' @description Set groups available in an application
-                                #' @details !! Do not use in shiny applications (except shintousers_app) !!
-                                #' @param groups The choices for application groups, can be anything
-                                #' @param appname The rsconnect application name
-                                set_application_groups = function(appname, groups){
-
-                                  group_json <- self$to_json(groups)
-                                  self$execute_query(glue::glue("update {self$schema}.applications set groups = '{group_json}' where appname = '{appname}'"))
-
-                                },
 
                                 #' @description Get available roles for an application
                                 #' @details !! Do not use in shiny applications (except shintousers_app) !!
                                 #' @param appname The rsconnect application name
                                 get_application_roles = function(appname){
 
-                                  out <- self$query(glue::glue("select roles from {self$schema}.applications where appname = '{appname}'"))$roles
+                                  qu <- glue::glue("select roles from {self$schema}.applications where appname = ?appname") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               appname = appname)
+
+                                  out <- self$query(query)$roles
 
                                   if(all(is.na(out)) || length(out) == 0){
                                     return(NA)
@@ -733,7 +809,15 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname The rsconnect application name
                                 get_application_groups = function(appname){
 
-                                  out <- self$query(glue::glue("select groups from {self$schema}.applications where appname = '{appname}'"))$groups
+                                  qu <- glue::glue("select groups from {self$schema}.applications where appname = ?appname") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               appname = appname)
+
+                                  out <- self$query(query)$groups
+
 
                                   if(all(is.na(out)) || length(out) == 0 || out == ""){
                                     return(NA)
@@ -742,24 +826,6 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   }
 
                                 },
-
-                                #' @description Get list of available applications
-                                #' @details !! Do not use in shiny applications (except shintousers_app) !!
-                                get_applications = function(){
-
-                                  sort(self$query(glue::glue("select appname from {self$schema}.applications"))$appname)
-
-                                },
-
-                                #' @description Remove an application
-                                #' @details !! Do not use in shiny applications (except shintousers_app) !!
-                                #' @param appname The rsconnect application name
-                                remove_application = function(appname){
-
-                                  self$execute_query(glue::glue("delete from {self$schema}.applications where appname = '{appname}'"))
-
-                                },
-
 
                                 #' @description Log a timing. Writes data to 'timings' table in shintousers, with appname, key and
                                 #' double precision value.
