@@ -111,6 +111,38 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   jsonlite::fromJSON(txt)
                                 },
 
+                                #' @description Add user to msal registry in shintousers
+                                #' @param userid userid from MSAL for user
+                                #' @param appname appname for the application user has access to
+                                #' @param role Roles user has within application
+                                #' @param groups JSON with groups user belongs to within application
+                                #' @param username username (or label) for user
+                                #' @param email email from user
+                                #' @param attributes attributes from user
+                                #' @param comments comments about user
+                                add_msal_user =  function(userid, appname, role = NULL, groups = NULL,
+                                                          username = NULL, email, attributes = NULL, comments = NULL){
+                                  browser()
+
+
+                                  qu <- glue::glue("INSERT INTO {self$schema}.shiny_msal_accounts (userid, appname, role, groups, username, email, attributes, comments) VALUES(?userid, ?appname, ?role, ?groups, ?username, ?email, ?attributes, ?comments)") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               timestamp  = as.character(Sys.time()),
+                                                               userid = userid,
+                                                               role = role,
+                                                               groups = groups,
+                                                               username = username,
+                                                               email = email,
+                                                               attributes = attributes,
+                                                               comments = comments)
+
+                                  self$execute_query(query)
+
+                                },
+
                                 #' @description Read username for a user (default = current user)
                                 #' @param userid Vector of user ID's
                                 #' @param appname Application name (can be NULL, appname on init is then used)
@@ -143,14 +175,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   if(!self$app_has_user(userid, appname)){
 
-                                    self$append_data(
-                                      "shiny_msal_accounts",
-                                      data.frame(
-                                        userid = userid,
-                                        appname = appname,
-                                        username = username
-                                      )
-                                    )
+                                    message("Tried to set the username for a non-existent user")
+                                    return(NULL)
 
                                   } else {
 
@@ -202,14 +228,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   if(!self$app_has_user(userid, appname)){
 
-                                    self$append_data(
-                                      "shiny_msal_accounts",
-                                      data.frame(
-                                        userid = userid,
-                                        appname = appname,
-                                        email = email
-                                      )
-                                    )
+                                    message("Tried to set the email for a non-existent user")
+                                    return(NULL)
 
                                   } else {
                                     qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts SET email = ?email
@@ -259,14 +279,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   if(!self$app_has_user(userid, appname)){
 
-                                    self$append_data(
-                                      "shiny_msal_accounts",
-                                      data.frame(
-                                        userid = userid,
-                                        appname = appname,
-                                        comments = comments
-                                      )
-                                    )
+                                    message("Tried to set the comment for a non-existent user")
+                                    return(NULL)
 
                                   } else {
 
@@ -354,15 +368,17 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   # User has not previously logged in
                                   if(is.null(user_log)){
-                                    self$append_data(
-                                      "logins",
-                                      data.frame(
-                                        timestamp  = as.character(Sys.time()),
-                                        userid = userid,
-                                        appname = appname,
-                                        appversion = appversion
-                                      )
-                                    )
+                                    qu <- glue::glue("INSERT INTO {self$schema}.logins (timestamp, userid, appname, appversion) VALUES(?timestamp, ?userid, ?appname, ?appversion)") %>% as.character()
+
+
+                                    query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                                 qu,
+                                                                 timestamp  = as.character(Sys.time()),
+                                                                 userid = userid,
+                                                                 appname = appname,
+                                                                 appversion = appversion)
+
+                                    self$execute_query(query)
 
                                     user_log <- self$get_last_login()
                                   }
@@ -476,14 +492,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   if(!self$app_has_user(userid, appname)){
 
-                                    self$append_data(
-                                      "shiny_msal_accounts",
-                                      data.frame(
-                                        userid = userid,
-                                        appname = appname,
-                                        attributes = atr_json
-                                      )
-                                    )
+                                    message("Tried to set user attrabutes for a non-existent user")
+                                    return(NULL)
 
                                   } else {
 
@@ -554,14 +564,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   if(!self$app_has_user(userid, appname)){
 
-                                    self$append_data(
-                                      "shiny_msal_accounts",
-                                      data.frame(
-                                        userid = userid,
-                                        appname = appname,
-                                        role = role
-                                      )
-                                    )
+                                    message("Tried to set role for a non-existent user")
+                                    return(NULL)
 
                                   } else {
 
@@ -618,7 +622,7 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   if(!self$app_has_user(userid, appname)){
 
-                                    message("Tried to disable a non-existent user ($enable_disable_user in shintousers)")
+                                    message("Tried to enable/disable a non-existent user")
                                     return(NULL)
 
                                   } else {
@@ -711,14 +715,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   if(!self$app_has_user(userid, appname)){
 
-                                    self$append_data(
-                                      "shiny_msal_accounts",
-                                      data.frame(
-                                        userid = userid,
-                                        appname = appname,
-                                        groups = group
-                                      )
-                                    )
+                                    message("Tried to set group(s) for a non-existent user")
+                                    return(NULL)
 
                                   } else {
 
@@ -839,16 +837,119 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                     return(NULL)
                                   }
 
-                                  self$append_data(
-                                    "timings",
-                                    data.frame(
-                                      appname = self$appname,
-                                      key = key,
-                                      value = v_n,
-                                      userid  = self$userid
-                                    )
-                                  )
 
+                                  qu <- glue::glue("INSERT INTO {self$schema}.timings (appname, key, value, userid) VALUES(?appname, ?key, ?value, ?userid)") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               appname = self$appname,
+                                                               key = key,
+                                                               value = v_n,
+                                                               userid  = self$userid)
+
+                                  self$execute_query(query)
+
+
+
+                                },
+
+
+                                ##### Invitations #####
+
+                                #' @description Add an invitation for a user
+                                #' @param email email of the user to be invited
+                                #' @param username name of the user
+                                #' @param invite_sent_by name of user that sent invite
+                                #' @param appname appname of the application the invite is sent for
+                                #' @param role the roles the invitee should get upon accepting
+                                #' @param groups the groups the invitee should belong to upon accepting
+                                add_invite = function(email, username = NULL, invite_sent_by, appname, role = NULL, groups = NULL){
+                                  browser()
+
+                                  if(is.null(groups)){
+                                    parsed_groups <- ""
+                                  } else {
+                                    parsed_groups <- self$to_json(groups)
+                                  }
+
+                                  qu <- glue::glue("INSERT INTO {self$schema}.shiny_msal_accounts_pending_invites (email, username, invite_sent_by, appname, role, groups) VALUES(?email, ?username, ?invite_sent_by, ?appname, ?role, ?parsed_groups)") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               email = email,
+                                                               username = username,
+                                                               invite_sent_by = invite_sent_by,
+                                                               appname = appname,
+                                                               role = role,
+                                                               parsed_groups = parsed_groups)
+
+                                  self$execute_query(query)
+
+                                },
+
+                                #' @description Checks if there is an invite connected to email adress for appname
+                                #' @param appname rsconnect application name
+                                #' @param email email address of user to be checked
+                                has_invite = function(appname, email){
+                                  browser()
+                                  qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts_pending_invites where appname = ?appname AND email = ?email") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               appname = appname,
+                                                               email = email)
+
+                                  out <- self$query(query)
+
+                                  if(nrow(out) > 0){
+                                    return(TRUE)
+                                  } else {
+                                    return(FALSE)
+                                  }
+
+                                },
+
+                                #' @description Checks if there is an invite connected to email adress for appname
+                                #' @param appname rsconnect application name
+                                #' @param email email address of user to be checked
+                                get_invite = function(appname, email){
+                                  browser()
+                                  qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts_pending_invites where appname = ?appname AND email = ?email") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               appname = appname,
+                                                               email = email)
+
+                                  out <- self$query(query)
+
+                                  if(nrow(unique(out)) > 1){
+                                    message("Multiple different invites for user sent. No way of knowing which one is correct. Please check.")
+                                    return(NULL)
+                                  } else {
+                                    return(unique(out))
+                                  }
+
+                                },
+
+                                #' @description Remove an invitation for a user
+                                #' @param inviteid id of invitation to be deleted
+                                #' @param appname rsconnect application name
+                                remove_invite = function(inviteid, appname){
+                                  browser()
+
+                                  qu <- glue::glue("delete from {self$schema}.shiny_msal_accounts_pending_invites where invite_id = ?invite_id and appname = ?appname") %>% as.character()
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               invite_id = inviteid,
+                                                               appname = appname)
+
+                                  self$execute_query(query)
 
                                 }
 

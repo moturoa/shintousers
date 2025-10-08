@@ -37,6 +37,7 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoMSALUser-get_shiny_user}{\code{shintoMSALUser$get_shiny_user()}}
 \item \href{#method-ShintoMSALUser-to_json}{\code{shintoMSALUser$to_json()}}
 \item \href{#method-ShintoMSALUser-from_json}{\code{shintoMSALUser$from_json()}}
+\item \href{#method-ShintoMSALUser-add_msal_user}{\code{shintoMSALUser$add_msal_user()}}
 \item \href{#method-ShintoMSALUser-get_name}{\code{shintoMSALUser$get_name()}}
 \item \href{#method-ShintoMSALUser-set_user_name}{\code{shintoMSALUser$set_user_name()}}
 \item \href{#method-ShintoMSALUser-get_email}{\code{shintoMSALUser$get_email()}}
@@ -65,6 +66,10 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoMSALUser-get_application_roles}{\code{shintoMSALUser$get_application_roles()}}
 \item \href{#method-ShintoMSALUser-get_application_groups}{\code{shintoMSALUser$get_application_groups()}}
 \item \href{#method-ShintoMSALUser-log_timing}{\code{shintoMSALUser$log_timing()}}
+\item \href{#method-ShintoMSALUser-add_invite}{\code{shintoMSALUser$add_invite()}}
+\item \href{#method-ShintoMSALUser-has_invite}{\code{shintoMSALUser$has_invite()}}
+\item \href{#method-ShintoMSALUser-get_invite}{\code{shintoMSALUser$get_invite()}}
+\item \href{#method-ShintoMSALUser-remove_invite}{\code{shintoMSALUser$remove_invite()}}
 \item \href{#method-ShintoMSALUser-clone}{\code{shintoMSALUser$clone()}}
 }
 }
@@ -204,6 +209,46 @@ Convert to JSON
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{txt}}{Text string, JSON}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-add_msal_user"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-add_msal_user}{}}}
+\subsection{Method \code{add_msal_user()}}{
+Add user to msal registry in shintousers
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$add_msal_user(
+  userid,
+  appname,
+  role = NULL,
+  groups = NULL,
+  username = NULL,
+  email,
+  attributes = NULL,
+  comments = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{userid}}{userid from MSAL for user}
+
+\item{\code{appname}}{appname for the application user has access to}
+
+\item{\code{role}}{Roles user has within application}
+
+\item{\code{groups}}{JSON with groups user belongs to within application}
+
+\item{\code{username}}{username (or label) for user}
+
+\item{\code{email}}{email from user}
+
+\item{\code{attributes}}{attributes from user}
+
+\item{\code{comments}}{comments about user}
 }
 \if{html}{\out{</div>}}
 }
@@ -784,6 +829,97 @@ double precision value.
 \item{\code{key}}{Key in database table}
 
 \item{\code{timing}}{Time in seconds}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-add_invite"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-add_invite}{}}}
+\subsection{Method \code{add_invite()}}{
+Add an invitation for a user
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$add_invite(
+  email,
+  username = NULL,
+  invite_sent_by,
+  appname,
+  role = NULL,
+  groups = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{email}}{email of the user to be invited}
+
+\item{\code{username}}{name of the user}
+
+\item{\code{invite_sent_by}}{name of user that sent invite}
+
+\item{\code{appname}}{appname of the application the invite is sent for}
+
+\item{\code{role}}{the roles the invitee should get upon accepting}
+
+\item{\code{groups}}{the groups the invitee should belong to upon accepting}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-has_invite"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-has_invite}{}}}
+\subsection{Method \code{has_invite()}}{
+Checks if there is an invite connected to email adress for appname
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$has_invite(appname, email)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{appname}}{rsconnect application name}
+
+\item{\code{email}}{email address of user to be checked}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-get_invite"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-get_invite}{}}}
+\subsection{Method \code{get_invite()}}{
+Checks if there is an invite connected to email adress for appname
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_invite(appname, email)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{appname}}{rsconnect application name}
+
+\item{\code{email}}{email address of user to be checked}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-remove_invite"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-remove_invite}{}}}
+\subsection{Method \code{remove_invite()}}{
+Remove an invitation for a user
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$remove_invite(inviteid, appname)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{inviteid}}{id of invitation to be deleted}
+
+\item{\code{appname}}{rsconnect application name}
 }
 \if{html}{\out{</div>}}
 }

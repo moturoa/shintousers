@@ -1,7 +1,7 @@
 Package: shintousers
 Type: Package
 Title: Methods for Shiny Apps Users
-Version: 1.4.0
+Version: 1.4.1
 Author: Remko Duursma, Wesley Brants
 Imports: R6, glue, dplyr, jsonlite, shiny, shintodb
 Maintainer: Wesley Brants <wesley@shintolabs.nl>

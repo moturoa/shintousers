@@ -13,37 +13,73 @@ msalUserManagementUI <- function(id){
 
   softui::fluid_row(
     shiny::column(12,
-                  htmltools::tags$div(id = ns("box_user"),
-                                      softui::box(
-                                        title = "Gebruikers",
-                                        icon = bsicon("person"),
-                                        width = 12,
-                                        softui::fluid_row(style = "padding-top: 30px; padding-bottom: 30px;",
-                                                          shiny::column(12,
-                                                                        shinyjs::hidden(
-                                                                          shiny::actionButton(ns("btn_remove_person"),
-                                                                                              "Verwijderen",
-                                                                                              icon = bsicon("person-dash"),
-                                                                                              class = "btn-light")
-                                                                        ),
 
-                                                                        shinyjs::hidden(
-                                                                          shiny::actionButton(ns("btn_edit_user"),
-                                                                                              "Bewerken",
-                                                                                              icon = bsicon("pencil-square"),
-                                                                                              class = "btn-light")
+                  softui::tab_box(width = 12,
+                                  softui::tab_panel(title = "Huidige gebruikers",
+                                                    icon = softui::bsicon("person-fill-gear"),
+
+                                                    htmltools::tags$div(id = ns("box_user"),
+                                                                        softui::fluid_row(style = "padding-top: 30px; padding-bottom: 30px;",
+                                                                                          shiny::column(12,
+                                                                                                        shinyjs::hidden(
+                                                                                                          shiny::actionButton(ns("btn_remove_person"),
+                                                                                                                              "Verwijderen",
+                                                                                                                              icon = bsicon("person-dash"),
+                                                                                                                              class = "btn-light")
+                                                                                                        ),
+
+                                                                                                        shinyjs::hidden(
+                                                                                                          shiny::actionButton(ns("btn_edit_user"),
+                                                                                                                              "Bewerken",
+                                                                                                                              icon = bsicon("pencil-square"),
+                                                                                                                              class = "btn-light")
+                                                                                                        ),
+                                                                                          )
                                                                         ),
-                                                          )
-                                        ),
-                                        softui::fluid_row(
-                                          shiny::column(12,
-                                                 DT::dataTableOutput(ns("dt_roles"))
-                                          )
-                                        )
-                                      )
+                                                                        softui::fluid_row(
+                                                                          shiny::column(12,
+                                                                                        DT::dataTableOutput(ns("dt_roles"))
+                                                                          )
+                                                                        )
+
+
+                                                    )
+                                  ),
+                                  softui::tab_panel(title = "Openstaande uitnodigingen",
+                                                    icon = bsicon("person-plus-fill"),
+
+                                                    htmltools::tags$div(id = ns("box_pending"),
+                                                                        softui::fluid_row(style = "padding-top: 30px; padding-bottom: 30px;",
+                                                                                          shiny::column(12,
+                                                                                                        shiny::actionButton(ns("btn_add_user_invite"),
+                                                                                                                            "Gebruiker uitnodigen",
+                                                                                                                            icon = bsicon("person-fill-add"),
+                                                                                                                            class = "btn-light"),
+                                                                                                        shinyjs::hidden(
+                                                                                                          shiny::actionButton(ns("btn_remove_invite"),
+                                                                                                                              "Verwijderen",
+                                                                                                                              icon = bsicon("person-dash"),
+                                                                                                                              class = "btn-light")
+                                                                                                        )
+                                                                                          )
+                                                                        ),
+                                                                        softui::fluid_row(
+                                                                          shiny::column(12,
+                                                                                        DT::dataTableOutput(ns("dt_invites"))
+                                                                          )
+                                                                        )
+
+
+                                                    )
+
+                                  )
                   )
+
+
     )
+
   )
+
 }
 
 #' @title MSAL User Management Module
@@ -57,18 +93,19 @@ msalUserManagementUI <- function(id){
 #' @importFrom shiny reactive observe observeEvent showModal modalDialog tagList textInput radioButtons selectInput actionButton removeModal
 #' @importFrom dplyr filter collect mutate slice
 #' @importFrom DT renderDT
-#' @importFrom shintoui datatafel
 #' @importFrom shinyjs toggle disabled
 #' @importFrom shinytoastr toastr_success
 #' @importFrom softui bsicon
+#' @importFrom softui datatafel
 #' @export
 msalUserManagementModule <- function(input, output, session, .user, appname){
 
   ns <- session$ns
 
   gargoyle::init("edit_role")
+  gargoyle::init("edit_invites")
 
-  app_data <- shiny::reactive({
+  app_user_data <- shiny::reactive({
     gargoyle::watch("edit_role")
 
     .user$read_table("shiny_msal_accounts", lazy = TRUE) %>%
@@ -76,24 +113,34 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
       dplyr::collect()
   })
 
-  output$dt_roles <- DT::renderDT({
+  app_invite_data <- shiny::reactive({
+    gargoyle::watch("edit_invites")
 
-    app_data() %>%
+    .user$read_table("shiny_msal_accounts_pending_invites", lazy = TRUE) %>%
+      dplyr::filter(appname == !!appname) %>%
+      dplyr::collect()
+  })
+
+  output$dt_roles <- DT::renderDT({
+    app_user_data() %>%
       dplyr::mutate(active = ifelse(active,
-                             as.character(bsicon("check-circle-fill", style = "color:green;")),
-                             as.character(bsicon("dash-circle-fill", style = "color:red;"))
+                                    as.character(bsicon("check-circle-fill", style = "color:green;")),
+                                    as.character(bsicon("dash-circle-fill", style = "color:red;"))
       )) %>%
-      shintoui::datatafel(selection = "single", options = list(
-        columnDefs = list(
-          list(targets = 0, visible = FALSE)
-        )
-      ))
+      softui::datatafel(selection = "single", dom = "tp",
+                        pageLength = 30, scrollX = TRUE,
+                        extensions = list(), options = list(
+                          columnDefs = list(
+                            list(targets = 0, visible = FALSE)
+                          )
+                        ))
+
   })
 
   selected_persoon <- shiny::reactive({
     ii <- input$dt_roles_rows_selected
     if(is.null(ii))return(NULL)
-    dplyr::slice(app_data(), ii)
+    dplyr::slice(app_user_data(), ii)
   })
 
 
@@ -132,44 +179,47 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
         title = shiny::tagList(softui::bsicon("pencil-square"), "Gebruiker bewerken"),
         shinyjs::disabled(
           shiny::textInput(ns("txt_userid_edit"), "Gebruiker id (rsconnect username)",
-                    value = selected_persoon()$userid)
+                           value = selected_persoon()$userid)
         ),
         shiny::textInput(ns("txt_name_edit"), "Gebruiker naam (label)",
-                  value = cur_name),
+                         value = cur_name),
         shiny::textInput(ns("txt_email_edit"), "Email adres",
-                  value = cur_email),
+                         value = cur_email),
 
 
         shiny::radioButtons(ns("rad_persoon_active"), "Actief",
-                     inline = TRUE,
-                     choices = c("Ja" = "active", "Nee" = "inactive"),
-                     selected = ifelse(cur_active, "active", "inactive")),
+                            inline = TRUE,
+                            choices = c("Ja" = "active", "Nee" = "inactive"),
+                            selected = ifelse(cur_active, "active", "inactive")),
 
         shiny::selectInput(ns("sel_role_edit"), "Rol",
-                    choices = .user$get_application_roles(appname),
-                    selected = cur_role
+                           choices = .user$get_application_roles(appname),
+                           selected = cur_role
         ),
 
         shiny::selectInput(ns("sel_group_edit"), "Groepen",
-                    choices = .user$get_application_groups(appname),
-                    selected = cur_group, multiple = TRUE),
+                           choices = .user$get_application_groups(appname),
+                           selected = cur_group, multiple = TRUE),
 
         shiny::textInput(ns("txt_comment_edit"), "Korte opmerking",
-                  value = cur_comment),
+                         value = cur_comment),
 
         footer = shiny::tagList(
-          shiny::actionButton("xyz", "Annuleren",
-                       icon = icon("times"),
-                       class= "btn-danger ontop",
-                       `data-dismiss` = "modal"),
+          shiny::actionButton(ns("btn_close_edit_user_modal"), "Annuleren",
+                              icon = icon("times"),
+                              class= "btn-danger ontop"),
           shiny::actionButton(ns("btn_confirm_edit_user"),
-                       "OK", icon = bsicon("check"),
-                       class = "btn-success")
+                              "OK", icon = bsicon("check"),
+                              class = "btn-success")
         )
       )
     )
 
 
+  })
+
+  shiny::observeEvent(input$btn_close_edit_user_modal, {
+    shiny::removeModal()
   })
 
   shiny::observeEvent(input$btn_confirm_edit_user, {
@@ -200,6 +250,99 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
 
 
     gargoyle::trigger("edit_role")
+    shiny::removeModal()
+  })
+
+
+
+  ##### Invites #####
+
+
+  output$dt_invites <- DT::renderDT({
+    app_invite_data() %>%
+        dplyr::select(invite_id, email, dplyr::everything()) %>%
+      softui::datatafel(selection = "single", dom = "tp",
+                        pageLength = 30, scrollX = TRUE,
+                        extensions = list(), options = list(
+                          columnDefs = list(
+                            list(targets = 0, visible = FALSE)
+                          )
+                        ))
+
+  })
+
+  selected_invite <- shiny::reactive({
+    ii <- input$dt_invites_rows_selected
+    if(is.null(ii))return(NULL)
+    dplyr::slice(app_invite_data(), ii)
+  })
+
+  # Invite verwijderen
+  shiny::observe({
+    sel_invite <- selected_invite()
+    shinyjs::toggle("btn_remove_invite", condition = !is.null(sel_invite))
+  })
+
+
+  shiny::observeEvent(input$btn_remove_invite, {
+    .user$remove_invite(inviteid = selected_invite()$invite_id, appname = appname)
+    shinytoastr::toastr_success("Uitnodiging verwijderd")
+    gargoyle::trigger("edit_invites")
+
+  })
+
+
+  # Uitnodiging toevoegen
+  shiny::observeEvent(input$btn_add_user_invite, {
+
+    shiny::showModal(
+      shiny::modalDialog(
+        fade = FALSE,
+        easyClose = FALSE,
+        title = shiny::tagList(softui::bsicon("envelope-arrow-up-fill"), "Uitnodiging versturen"),
+
+        shiny::textInput(ns("txt_email_invite"), "Email adres"),
+
+        shiny::textInput(ns("txt_name_invite"), "Gebruiker naam (label)"),
+
+        shiny::selectInput(ns("sel_role_invite"), "Rol",
+                           choices = .user$get_application_roles(appname)
+        ),
+        shiny::selectInput(ns("sel_group_invite"), "Groepen",
+                           choices = .user$get_application_groups(appname),
+                           multiple = TRUE),
+
+        footer = shiny::tagList(
+          shiny::actionButton(ns("btn_close_invite_user_modal"), "Annuleren",
+                              icon = icon("times"),
+                              class= "btn-danger ontop"),
+          shiny::actionButton(ns("btn_confirm_send_invite"),
+                              "OK", icon = bsicon("check"),
+                              class = "btn-success")
+        )
+      )
+    )
+
+
+  })
+
+  shiny::observeEvent(input$btn_close_invite_user_modal, {
+    shiny::removeModal()
+  })
+
+  shiny::observeEvent(input$btn_confirm_send_invite, {
+
+    .user$add_invite(email = input$txt_email_invite,
+                     username = input$txt_name_invite,
+                     invite_sent_by = .user$userid,
+                     appname = appname,
+                     role = input$sel_role_invite,
+                     groups = input$sel_group_invite)
+
+
+
+
+    gargoyle::trigger("edit_invites")
     shiny::removeModal()
   })
 
