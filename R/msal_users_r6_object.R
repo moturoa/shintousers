@@ -120,10 +120,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param email email from user
                                 #' @param attributes attributes from user
                                 #' @param comments comments about user
-                                add_msal_user =  function(userid, appname, role = NULL, groups = NULL,
-                                                          username = NULL, email, attributes = NULL, comments = NULL){
-                                  browser()
-
+                                add_msal_user =  function(userid, appname, role = NA, groups = NA,
+                                                          username = NA, email, attributes = NA, comments = NA){
 
                                   qu <- glue::glue("INSERT INTO {self$schema}.shiny_msal_accounts (userid, appname, role, groups, username, email, attributes, comments) VALUES(?userid, ?appname, ?role, ?groups, ?username, ?email, ?attributes, ?comments)") %>% as.character()
 
@@ -331,7 +329,7 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname rsconnect application name
                                 #' @param appversion application version string
                                 set_last_login = function(now = as.character(Sys.time()),
-                                                          userid = NULL, appname = NULL, appversion = NULL){
+                                                          userid = NA, appname = NA, appversion = NA){
 
                                   if(is.null(userid))userid <- self$userid
                                   if(is.null(appname))appname <- self$appname
@@ -864,10 +862,8 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname appname of the application the invite is sent for
                                 #' @param role the roles the invitee should get upon accepting
                                 #' @param groups the groups the invitee should belong to upon accepting
-                                add_invite = function(email, username = NULL, invite_sent_by, appname, role = NULL, groups = NULL){
-                                  browser()
-
-                                  if(is.null(groups)){
+                                add_invite = function(email, username = NULL, invite_sent_by, appname, role = NA, groups = NA){
+                                  if(is.na(groups)){
                                     parsed_groups <- ""
                                   } else {
                                     parsed_groups <- self$to_json(groups)
@@ -893,7 +889,6 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname rsconnect application name
                                 #' @param email email address of user to be checked
                                 has_invite = function(appname, email){
-                                  browser()
                                   qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts_pending_invites where appname = ?appname AND email = ?email") %>% as.character()
 
 
@@ -916,7 +911,6 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname rsconnect application name
                                 #' @param email email address of user to be checked
                                 get_invite = function(appname, email){
-                                  browser()
                                   qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts_pending_invites where appname = ?appname AND email = ?email") %>% as.character()
 
 
@@ -940,8 +934,6 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param inviteid id of invitation to be deleted
                                 #' @param appname rsconnect application name
                                 remove_invite = function(inviteid, appname){
-                                  browser()
-
                                   qu <- glue::glue("delete from {self$schema}.shiny_msal_accounts_pending_invites where invite_id = ?invite_id and appname = ?appname") %>% as.character()
 
                                   query <- DBI::sqlInterpolate(DBI::ANSI(),

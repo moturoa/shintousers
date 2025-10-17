@@ -222,12 +222,12 @@ Add user to msal registry in shintousers
 \if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$add_msal_user(
   userid,
   appname,
-  role = NULL,
-  groups = NULL,
-  username = NULL,
+  role = NA,
+  groups = NA,
+  username = NA,
   email,
-  attributes = NULL,
-  comments = NULL
+  attributes = NA,
+  comments = NA
 )}\if{html}{\out{</div>}}
 }
 
@@ -400,9 +400,9 @@ Update the last login for this user / appname (in table `shintousers.logins`)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$set_last_login(
   now = as.character(Sys.time()),
-  userid = NULL,
-  appname = NULL,
-  appversion = NULL
+  userid = NA,
+  appname = NA,
+  appversion = NA
 )}\if{html}{\out{</div>}}
 }
 
@@ -844,8 +844,8 @@ Add an invitation for a user
   username = NULL,
   invite_sent_by,
   appname,
-  role = NULL,
-  groups = NULL
+  role = NA,
+  groups = NA
 )}\if{html}{\out{</div>}}
 }
 
