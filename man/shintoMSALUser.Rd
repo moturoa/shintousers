@@ -24,7 +24,7 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 
 \item{\code{userid}}{The application (shiny) user name}
 
-\item{\code{appname}}{The (rsconnect) application name}
+\item{\code{appname}}{The  application name}
 
 \item{\code{appversion}}{Version of the app (optionally read from VERSION)}
 }
@@ -34,7 +34,6 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ShintoMSALUser-new}{\code{shintoMSALUser$new()}}
-\item \href{#method-ShintoMSALUser-get_shiny_user}{\code{shintoMSALUser$get_shiny_user()}}
 \item \href{#method-ShintoMSALUser-to_json}{\code{shintoMSALUser$to_json()}}
 \item \href{#method-ShintoMSALUser-from_json}{\code{shintoMSALUser$from_json()}}
 \item \href{#method-ShintoMSALUser-add_msal_user}{\code{shintoMSALUser$add_msal_user()}}
@@ -60,7 +59,7 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoMSALUser-get_group}{\code{shintoMSALUser$get_group()}}
 \item \href{#method-ShintoMSALUser-is_in_group}{\code{shintoMSALUser$is_in_group()}}
 \item \href{#method-ShintoMSALUser-set_group}{\code{shintoMSALUser$set_group()}}
-\item \href{#method-ShintoMSALUser-remove_role}{\code{shintoMSALUser$remove_role()}}
+\item \href{#method-ShintoMSALUser-remove_msal_account_from_app}{\code{shintoMSALUser$remove_msal_account_from_app()}}
 \item \href{#method-ShintoMSALUser-has_role}{\code{shintoMSALUser$has_role()}}
 \item \href{#method-ShintoMSALUser-is_admin}{\code{shintoMSALUser$is_admin()}}
 \item \href{#method-ShintoMSALUser-get_application_roles}{\code{shintoMSALUser$get_application_roles()}}
@@ -69,7 +68,10 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoMSALUser-add_invite}{\code{shintoMSALUser$add_invite()}}
 \item \href{#method-ShintoMSALUser-has_invite}{\code{shintoMSALUser$has_invite()}}
 \item \href{#method-ShintoMSALUser-get_invite}{\code{shintoMSALUser$get_invite()}}
+\item \href{#method-ShintoMSALUser-update_invite}{\code{shintoMSALUser$update_invite()}}
 \item \href{#method-ShintoMSALUser-remove_invite}{\code{shintoMSALUser$remove_invite()}}
+\item \href{#method-ShintoMSALUser-make_msal_log}{\code{shintoMSALUser$make_msal_log()}}
+\item \href{#method-ShintoMSALUser-get_applications}{\code{shintoMSALUser$get_applications()}}
 \item \href{#method-ShintoMSALUser-clone}{\code{shintoMSALUser$clone()}}
 }
 }
@@ -109,10 +111,9 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 Make new shintousers object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$new(
-  userid = NULL,
+  userid,
   appname = "",
   appversion = "",
-  default_user = "unknown",
   ad_groups = NULL,
   ad_authentication = FALSE,
   admin_group_pattern = "",
@@ -127,13 +128,11 @@ Make new shintousers object
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username, if not NULL it is stored and used for all methods (handy inside an app)}
+\item{\code{userid}}{userid, if not NULL it is stored and used for all methods (handy inside an app)}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{appversion}}{Optional, application version string}
-
-\item{\code{default_user}}{Optional, go-to username if nothing is filled in}
 
 \item{\code{ad_groups}}{Optional, active directory-groups}
 
@@ -155,28 +154,6 @@ Make new shintousers object
 }
 \subsection{Returns}{
 A 'shintousers' R6 object
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoMSALUser-get_shiny_user"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoMSALUser-get_shiny_user}{}}}
-\subsection{Method \code{get_shiny_user()}}{
-Get current shiny user
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_shiny_user(
-  default,
-  session = shiny::getDefaultReactiveDomain()
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{default}}{Default user (returned if user is NULL)}
-
-\item{\code{session}}{Shiny session object (no need to set)}
-}
-\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -259,7 +236,7 @@ Add user to msal registry in shintousers
 \subsection{Method \code{get_name()}}{
 Read username for a user (default = current user)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_name(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_name(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -284,9 +261,9 @@ Sets the username for a user.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{shiny application name}
 
 \item{\code{username}}{The username, typically Voornaam Achternaam}
 }
@@ -299,7 +276,7 @@ Sets the username for a user.
 \subsection{Method \code{get_email()}}{
 Read email address for a user (default = current user)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_email(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_email(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -324,9 +301,9 @@ Sets the email for a user.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{shiny application name}
 
 \item{\code{email}}{The email}
 }
@@ -339,7 +316,7 @@ Sets the email for a user.
 \subsection{Method \code{get_comment()}}{
 Read comment for a user (default = current user)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_comment(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_comment(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -364,9 +341,9 @@ Sets the comment for a user.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{comments}}{The comments}
 }
@@ -379,15 +356,15 @@ Sets the comment for a user.
 \subsection{Method \code{get_last_login()}}{
 Get last login for this user for this application (reads `shintousers.logins`)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_last_login(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_last_login(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -400,9 +377,9 @@ Update the last login for this user / appname (in table `shintousers.logins`)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$set_last_login(
   now = as.character(Sys.time()),
-  userid = NA,
-  appname = NA,
-  appversion = NA
+  userid,
+  appname,
+  appversion = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -411,9 +388,9 @@ Update the last login for this user / appname (in table `shintousers.logins`)
 \describe{
 \item{\code{now}}{Optional, time string (defaults to sys time)}
 
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{appversion}}{application version string}
 }
@@ -426,19 +403,15 @@ Update the last login for this user / appname (in table `shintousers.logins`)
 \subsection{Method \code{get_and_set_last_login()}}{
 Reads last login, and sets the current time as the new 'last login'.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_and_set_last_login(
-  userid = NULL,
-  appname = NULL,
-  appversion = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_and_set_last_login(userid, appname, appversion = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{appversion}}{application version string}
 }
@@ -462,9 +435,9 @@ Does an app have a user configured?
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -476,7 +449,7 @@ Does an app have a user configured?
 List users for an app
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$list_application_users(
-  appname = NULL,
+  appname,
   roles = NULL,
   groups = NULL,
   active_only = TRUE,
@@ -489,7 +462,7 @@ List users for an app
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{roles}}{rolnames to filter on}
 
@@ -518,9 +491,9 @@ Set attributes for a user
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{attributes}}{a list}
 }
@@ -539,9 +512,9 @@ Get attributes for a user
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -552,15 +525,15 @@ Get attributes for a user
 \subsection{Method \code{get_role()}}{
 Gets the role for the current user (admin or viewer, typically)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_role(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_role(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -577,9 +550,9 @@ Sets the role for a user.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{role}}{The user role, typically 'admin', 'viewer'}
 }
@@ -592,15 +565,15 @@ Sets the role for a user.
 \subsection{Method \code{get_user_active_inactive()}}{
 Gets the activity status of a user
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_user_active_inactive(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_user_active_inactive(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -674,15 +647,15 @@ Make the user active for an app
 \subsection{Method \code{get_group()}}{
 Get groups that the current user belongs to. See also `is_in_group`
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_group(userid = NULL, appname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_group(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -716,9 +689,9 @@ Set the group for this user.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{group}}{Group name}
 }
@@ -726,20 +699,20 @@ Set the group for this user.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ShintoMSALUser-remove_role"></a>}}
-\if{latex}{\out{\hypertarget{method-ShintoMSALUser-remove_role}{}}}
-\subsection{Method \code{remove_role()}}{
+\if{html}{\out{<a id="method-ShintoMSALUser-remove_msal_account_from_app"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-remove_msal_account_from_app}{}}}
+\subsection{Method \code{remove_msal_account_from_app()}}{
 Remove a role for a user
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$remove_role(userid, appname)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$remove_msal_account_from_app(userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{userid}}{rsconnect username (can be NULL, uses userid on init)}
+\item{\code{userid}}{msal userid}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -750,13 +723,17 @@ Remove a role for a user
 \subsection{Method \code{has_role()}}{
 Does the current user have a role? `$has_role("admin")` --> bool
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$has_role(role)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$has_role(role, userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{role}}{The user role, typically 'admin', 'viewer'}
+
+\item{\code{userid}}{msal userid}
+
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -783,7 +760,7 @@ Get available roles for an application
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{appname}}{The rsconnect application name}
+\item{\code{appname}}{The application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -804,7 +781,7 @@ Add an application to the list of applications
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{appname}}{The rsconnect application name}
+\item{\code{appname}}{The application name}
 }
 \if{html}{\out{</div>}}
 }
@@ -845,7 +822,7 @@ Add an invitation for a user
   invite_sent_by,
   appname,
   role = NA,
-  groups = NA
+  groups = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -863,6 +840,8 @@ Add an invitation for a user
 \item{\code{role}}{the roles the invitee should get upon accepting}
 
 \item{\code{groups}}{the groups the invitee should belong to upon accepting}
+
+\item{\code{expire_date}}{The date on which the invite expires}
 }
 \if{html}{\out{</div>}}
 }
@@ -871,17 +850,19 @@ Add an invitation for a user
 \if{html}{\out{<a id="method-ShintoMSALUser-has_invite"></a>}}
 \if{latex}{\out{\hypertarget{method-ShintoMSALUser-has_invite}{}}}
 \subsection{Method \code{has_invite()}}{
-Checks if there is an invite connected to email adress for appname
+Checks if there is an invite connected to email address for appname
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$has_invite(appname, email)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$has_invite(appname, email, ignore_expiration_date = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{email}}{email address of user to be checked}
+
+\item{\code{ignore_expiration_date}}{Boolean that tells if a filter should be applied based on expiration date. Handy to find if any invite exits or a to find invites that are still valid}
 }
 \if{html}{\out{</div>}}
 }
@@ -898,9 +879,48 @@ Checks if there is an invite connected to email adress for appname
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 
 \item{\code{email}}{email address of user to be checked}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-update_invite"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-update_invite}{}}}
+\subsection{Method \code{update_invite()}}{
+Update an invitation for a user
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$update_invite(
+  invite_id,
+  email,
+  username = NULL,
+  invite_sent_by,
+  appname,
+  role = NA,
+  groups = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{invite_id}}{The id of the invitation in de the table shiny_msal_accounts_pending_invites}
+
+\item{\code{email}}{email of the user to be invited}
+
+\item{\code{username}}{name of the user}
+
+\item{\code{invite_sent_by}}{name of user that sent invite}
+
+\item{\code{appname}}{appname of the application the invite is sent for}
+
+\item{\code{role}}{the roles the invitee should get upon accepting}
+
+\item{\code{groups}}{the groups the invitee should belong to upon accepting}
+
+\item{\code{expire_date}}{The date on which the invite expires}
 }
 \if{html}{\out{</div>}}
 }
@@ -919,10 +939,47 @@ Remove an invitation for a user
 \describe{
 \item{\code{inviteid}}{id of invitation to be deleted}
 
-\item{\code{appname}}{rsconnect application name}
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-make_msal_log"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-make_msal_log}{}}}
+\subsection{Method \code{make_msal_log()}}{
+Add a logging entry for MSAL users
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$make_msal_log(user_id, appname, action_type, logging_message)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{user_id}}{id of user causing the action that is logged}
+
+\item{\code{appname}}{application name}
+
+\item{\code{action_type}}{Categorical type of action}
+
+\item{\code{logging_message}}{Detailed logging message}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-get_applications"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-get_applications}{}}}
+\subsection{Method \code{get_applications()}}{
+Get list of available applications
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$get_applications()}\if{html}{\out{</div>}}
+}
+
+\subsection{Details}{
+!! Do not use in shiny applications (except shintousers_app) !!
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ShintoMSALUser-clone"></a>}}

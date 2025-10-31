@@ -88,13 +88,13 @@ msalUserManagementUI <- function(id){
 #' @param output output modalities of the module
 #' @param session R session object of the module
 #' @param .user user object, connection to the shintousers database and functions necessary
-#' @param appname appname for whoch the user can see connections
+#' @param appname appname for which the user can see connections
 #' @importFrom gargoyle init trigger watch
 #' @importFrom shiny reactive observe observeEvent showModal modalDialog tagList textInput radioButtons selectInput actionButton removeModal
 #' @importFrom dplyr filter collect mutate slice
 #' @importFrom DT renderDT
 #' @importFrom shinyjs toggle disabled
-#' @importFrom shinytoastr toastr_success
+#' @importFrom shinytoastr toastr_success toastr_error
 #' @importFrom softui bsicon
 #' @importFrom softui datatafel
 #' @export
@@ -153,7 +153,7 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
 
   shiny::observeEvent(input$btn_remove_person, {
 
-    .user$remove_role(userid = selected_persoon()$userid, appname = appname)
+    .user$remove_msal_account_from_app(userid = selected_persoon()$userid, appname = appname)
     shinytoastr::toastr_success("Persoon verwijderd")
     gargoyle::trigger("edit_role")
 
@@ -170,8 +170,6 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
     cur_attribute <- .user$get_user_attributes(selected_persoon()$userid, appname)
     cur_active <- .user$get_user_active_inactive(selected_persoon()$userid, appname)
 
-
-
     shiny::showModal(
       shiny::modalDialog(
         fade = FALSE,
@@ -181,10 +179,13 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
           shiny::textInput(ns("txt_userid_edit"), "Gebruiker id (rsconnect username)",
                            value = selected_persoon()$userid)
         ),
+        shinyjs::disabled(
+          shiny::textInput(ns("txt_email_edit"), "Email adres",
+                           value = cur_email)
+        ),
         shiny::textInput(ns("txt_name_edit"), "Gebruiker naam (label)",
                          value = cur_name),
-        shiny::textInput(ns("txt_email_edit"), "Email adres",
-                         value = cur_email),
+
 
 
         shiny::radioButtons(ns("rad_persoon_active"), "Actief",
@@ -223,13 +224,12 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
   })
 
   shiny::observeEvent(input$btn_confirm_edit_user, {
-
     .user$set_user_name(userid = input$txt_userid_edit,
                         appname = appname,
                         username = input$txt_name_edit)
-    .user$set_user_email(userid = input$txt_userid_edit,
-                         appname = appname,
-                         email = input$txt_email_edit)
+    # .user$set_user_email(userid = input$txt_userid_edit,
+    #                      appname = appname,
+    #                      email = input$txt_email_edit)
     .user$set_role(userid = input$txt_userid_edit,
                    appname = appname,
                    role = input$sel_role_edit)
@@ -260,7 +260,7 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
 
   output$dt_invites <- DT::renderDT({
     app_invite_data() %>%
-        dplyr::select(invite_id, email, dplyr::everything()) %>%
+      dplyr::select(invite_id, email, dplyr::everything()) %>%
       softui::datatafel(selection = "single", dom = "tp",
                         pageLength = 30, scrollX = TRUE,
                         extensions = list(), options = list(
@@ -332,18 +332,39 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
 
   shiny::observeEvent(input$btn_confirm_send_invite, {
 
-    .user$add_invite(email = input$txt_email_invite,
-                     username = input$txt_name_invite,
-                     invite_sent_by = .user$userid,
-                     appname = appname,
-                     role = input$sel_role_invite,
-                     groups = input$sel_group_invite)
+    if(is.null(input$txt_email_invite) || trimws(input$txt_email_invite) == ""){
+      shinytoastr::toastr_error("Geen email-adres ingevuld")
+    } else {
+      email_lowered <- tolower(input$txt_email_invite)
+
+      check_for_existing_invite <- .user$has_invite(appname, email_lowered, ignore_expiration_date = TRUE)
+
+      if(check_for_existing_invite){
+        invite_data <- .user$get_invite(appname = appname, email = email_lowered)
+
+        .user$update_invite(invite_id = invite_data$invite_id,
+                            email = email_lowered,
+                            username = input$txt_name_invite,
+                            invite_sent_by = .user$userid,
+                            appname = appname,
+                            role = input$sel_role_invite,
+                            groups = input$sel_group_invite)
+      } else {
+        .user$add_invite(email = email_lowered,
+                         username = input$txt_name_invite,
+                         invite_sent_by = .user$userid,
+                         appname = appname,
+                         role = input$sel_role_invite,
+                         groups = input$sel_group_invite)
+      }
+
+
+      gargoyle::trigger("edit_invites")
+      shiny::removeModal()
+    }
 
 
 
-
-    gargoyle::trigger("edit_invites")
-    shiny::removeModal()
   })
 
 

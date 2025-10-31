@@ -9,6 +9,7 @@
 #' @importFrom R6 R6Class
 #' @importFrom shintodb databaseClass
 #' @importFrom DBI ANSI sqlInterpolate
+#' @importFrom lubridate now
 #' @export
 shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                               inherit = shintodb::databaseClass,
@@ -28,17 +29,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @field userid The application (shiny) user name
                                 userid = NULL,
 
-                                #' @field appname The (rsconnect) application name
+                                #' @field appname The  application name
                                 appname = NULL,
 
                                 #' @field appversion Version of the app (optionally read from VERSION)
                                 appversion = NULL,
 
                                 #' @description Make new shintousers object
-                                #' @param userid rsconnect username, if not NULL it is stored and used for all methods (handy inside an app)
-                                #' @param appname rsconnect application name
+                                #' @param userid userid, if not NULL it is stored and used for all methods (handy inside an app)
+                                #' @param appname application name
                                 #' @param appversion Optional, application version string
-                                #' @param default_user Optional, go-to username if nothing is filled in
                                 #' @param ad_groups Optional, active directory-groups
                                 #' @param ad_authentication Boolean that checks if active directory authentication has to be done
                                 #' @param admin_group_pattern Optional pattern to see which groupnames are implicating admin users
@@ -48,10 +48,9 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param con Optional, existing database connection to shintousers (for recycling)
                                 #' @param ... Further arguments passed to [shintodb::connect()]
                                 #' @return A 'shintousers' R6 object
-                                initialize = function(userid = NULL,
+                                initialize = function(userid,
                                                       appname = "",
                                                       appversion = "",
-                                                      default_user = "unknown",
                                                       ad_groups = NULL,
                                                       ad_authentication = FALSE,
                                                       admin_group_pattern = "",
@@ -62,19 +61,25 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                                       ...){
 
-
                                   if(!is.null(dbusername) | !is.null(dbname)){
                                     message("Arguments 'dbusername' and 'dbname' to shintousers are now ignored! Both should be 'shintousers' in conf/config.yml")
                                   }
 
                                   super$initialize(what = "shintousers", schema = "shintousers", db_connection = con, pool = pool, ...)
 
-                                  if(is.null(userid)){
-                                    userid <- self$get_shiny_user(default = default_user)
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
                                   }
 
                                   self$userid <- userid
                                   self$appname <- appname
+
+
                                   self$appversion <- appversion
 
                                   self$ad_groups <- ad_groups
@@ -82,22 +87,6 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                   self$admin_group_pattern <- admin_group_pattern
 
                                 },
-
-                                #' @description Get current shiny user
-                                #' @param default Default user (returned if user is NULL)
-                                #' @param session Shiny session object (no need to set)
-
-                                # TODO Does this still work with EntraID or can it be removed/changed? Only used to get current user for initialization?
-                                get_shiny_user = function (default, session = shiny::getDefaultReactiveDomain()){
-
-                                  if(!shiny::isRunning() || is.null(session$user)){
-                                    default
-                                  } else {
-                                    session$user
-                                  }
-
-                                },
-
 
                                 #' @description Convert to JSON
                                 #' @param x An object to convert to JSON
@@ -123,6 +112,20 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 add_msal_user =  function(userid, appname, role = NA, groups = NA,
                                                           username = NA, email, attributes = NA, comments = NA){
 
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(email) || trimws(email) == ""){
+                                    message("The input email is NULL. Stopping execution.")
+                                    stop("Function terminated because email is NULL.")
+                                  }
+
+
                                   qu <- glue::glue("INSERT INTO {self$schema}.shiny_msal_accounts (userid, appname, role, groups, username, email, attributes, comments) VALUES(?userid, ?appname, ?role, ?groups, ?username, ?email, ?attributes, ?comments)") %>% as.character()
 
 
@@ -144,10 +147,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @description Read username for a user (default = current user)
                                 #' @param userid Vector of user ID's
                                 #' @param appname Application name (can be NULL, appname on init is then used)
-                                get_name = function(userid = NULL, appname = NULL){
+                                get_name = function(userid, appname){
 
-                                  if(is.null(appname))appname <- self$appname
-                                  if(is.null(userid))userid <- self$userid
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   data <- self$read_table("shiny_msal_accounts", lazy = TRUE) |>
                                     dplyr::filter(appname == !!appname) |>
@@ -166,10 +175,19 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Sets the username for a user.
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname shiny application name
                                 #' @param username The username, typically Voornaam Achternaam
                                 set_user_name = function(userid, appname, username){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   if(!self$app_has_user(userid, appname)){
 
@@ -197,10 +215,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @description Read email address for a user (default = current user)
                                 #' @param userid Vector of user ID's
                                 #' @param appname Application name (can be NULL, appname on init is then used)
-                                get_email = function(userid = NULL, appname = NULL){
+                                get_email = function(userid, appname){
 
-                                  if(is.null(appname))appname <- self$appname
-                                  if(is.null(userid))userid <- self$userid
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   data <- self$read_table("shiny_msal_accounts", lazy = TRUE) |>
                                     dplyr::filter(appname == !!appname) |>
@@ -219,10 +243,23 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Sets the email for a user.
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname shiny application name
                                 #' @param email The email
                                 set_user_email = function(userid, appname, email){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(email) || trimws(email) == ""){
+                                    message("The input email is NULL. Stopping execution.")
+                                    stop("Function terminated because email is NULL.")
+                                  }
 
                                   if(!self$app_has_user(userid, appname)){
 
@@ -248,10 +285,16 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @description Read comment for a user (default = current user)
                                 #' @param userid Vector of user ID's
                                 #' @param appname Application name (can be NULL, appname on init is then used)
-                                get_comment = function(userid = NULL, appname = NULL){
+                                get_comment = function(userid, appname){
 
-                                  if(is.null(appname))appname <- self$appname
-                                  if(is.null(userid))userid <- self$userid
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   data <- self$read_table("shiny_msal_accounts", lazy = TRUE) |>
                                     dplyr::filter(appname == !!appname) |>
@@ -270,10 +313,19 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Sets the comment for a user.
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 #' @param comments The comments
                                 set_comment = function(userid, appname, comments){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   if(!self$app_has_user(userid, appname)){
 
@@ -300,12 +352,18 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
 
                                 #' @description Get last login for this user for this application (reads `shintousers.logins`)
-                                #' @param userid rsconnect username
-                                #' @param appname rsconnect application name
-                                get_last_login = function(userid = NULL, appname = NULL){
+                                #' @param userid msal userid
+                                #' @param appname application name
+                                get_last_login = function(userid, appname){
 
-                                  if(is.null(userid))userid <- self$userid
-                                  if(is.null(appname))appname <- self$appname
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("SELECT timestamp, appversion FROM {self$schema}.logins WHERE
                                   userid = ?userid and appname = ?appname") %>% as.character()
@@ -325,15 +383,25 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 #' @description Update the last login for this user / appname (in table `shintousers.logins`)
                                 #' @param now Optional, time string (defaults to sys time)
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 #' @param appversion application version string
                                 set_last_login = function(now = as.character(Sys.time()),
-                                                          userid = NA, appname = NA, appversion = NA){
+                                                          userid, appname, appversion = NULL){
 
-                                  if(is.null(userid))userid <- self$userid
-                                  if(is.null(appname))appname <- self$appname
-                                  if(is.null(appversion))appversion <- self$appversion
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(appversion) || trimws(appversion) == ""){
+                                    message("The input appversion is NULL. Stopping execution.")
+                                    stop("Function terminated because appversion is NULL.")
+                                  }
+
 
                                   qu <- glue::glue("UPDATE {self$schema}.logins SET timestamp = ?now, appversion = ?appversion ",
                                                    "WHERE userid = ?userid and appname = ?appname") %>% as.character()
@@ -353,16 +421,27 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @details If user has never logged in, writes a new line in `shintousers.logins`,
                                 #' otherwise updates the last login.
                                 #' @returns Returns (invisibly) the last login information
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 #' @param appversion application version string
-                                get_and_set_last_login = function(userid = NULL, appname = NULL, appversion = NULL){
+                                get_and_set_last_login = function(userid, appname, appversion = NULL){
 
-                                  user_log <- self$get_last_login()
-
-                                  if(is.null(userid))userid <- self$userid
-                                  if(is.null(appname))appname <- self$appname
                                   if(is.null(appversion))appversion <- self$appversion
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(appversion) || trimws(appversion) == ""){
+                                    message("The input appversion is NULL. Stopping execution.")
+                                    stop("Function terminated because appversion is NULL.")
+                                  }
+
+                                  user_log <- self$get_last_login(userid = userid, appname = appname)
 
                                   # User has not previously logged in
                                   if(is.null(user_log)){
@@ -378,18 +457,27 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                     self$execute_query(query)
 
-                                    user_log <- self$get_last_login()
+                                    user_log <- self$get_last_login(userid = userid, appname = appname)
                                   }
 
-                                  self$set_last_login()
+                                  self$set_last_login(userid = userid, appname = appname, appversion = appversion)
 
                                   return(invisible(user_log))
                                 },
 
                                 #' @description Does an app have a user configured?
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 app_has_user = function(userid, appname){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts
                                                    where userid = ?userid and appname = ?appname") %>% as.character()
@@ -407,14 +495,14 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description List users for an app
-                                #' @param appname rsconnect application name
+                                #' @param appname application name
                                 #' @param roles rolnames to filter on
                                 #' @param groups groupnames to filter on
                                 #' @param active_only Boolean to show if only active accounts need to be shown
                                 #' @param ignore_groups Specific groups to ignore in the result. For example, exclude developer accounts
                                 #' @param by_group Boolean, show by group in result
                                 #' @param add_last_login Boolean, also show when user has logged in last.
-                                list_application_users = function(appname = NULL,
+                                list_application_users = function(appname,
                                                                   roles = NULL,
                                                                   groups = NULL,
                                                                   active_only = TRUE,
@@ -422,7 +510,11 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                                                   by_group = FALSE,
                                                                   add_last_login = FALSE){
 
-                                  if(is.null(appname))appname <- self$appname
+
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   data <- self$read_table("shiny_msal_accounts", lazy = TRUE) |>
                                     dplyr::filter(appname == !!appname) |>
@@ -481,10 +573,19 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Set attributes for a user
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 #' @param attributes a list
                                 set_user_attributes = function(userid, appname, attributes = list()){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   atr_json <- self$to_json(attributes)
 
@@ -511,9 +612,18 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Get attributes for a user
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 get_user_attributes = function(userid, appname){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   out <- self$read_table("shiny_msal_accounts", lazy = TRUE) |>
                                     dplyr::filter(userid %in% !!userid, appname == !!appname) |>
@@ -529,12 +639,18 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Gets the role for the current user (admin or viewer, typically)
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
-                                get_role = function(userid = NULL, appname = NULL){
+                                #' @param userid msal userid
+                                #' @param appname application name
+                                get_role = function(userid, appname){
 
-                                  if(is.null(userid))userid <- self$userid
-                                  if(is.null(appname))appname <- self$appname
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("select role from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
 
@@ -555,10 +671,19 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Sets the role for a user.
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 #' @param role The user role, typically 'admin', 'viewer'
                                 set_role = function(userid, appname, role){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   if(!self$app_has_user(userid, appname)){
 
@@ -583,12 +708,18 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Gets the activity status of a user
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
-                                get_user_active_inactive = function(userid = NULL, appname = NULL){
+                                #' @param userid msal userid
+                                #' @param appname application name
+                                get_user_active_inactive = function(userid, appname){
 
-                                  if(is.null(userid))userid <- self$userid
-                                  if(is.null(appname))appname <- self$appname
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("select active from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
 
@@ -613,6 +744,15 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname Application name
                                 #' @param what Either 'active' or 'inactive'
                                 set_user_active_inactive = function(userid, appname, what = c("active","inactive")){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   what <- match.arg(what)
                                   val <- what == "active"
@@ -646,6 +786,15 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname Application name
                                 disable_user = function(userid, appname){
 
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+
                                   self$set_user_active_inactive(userid, appname, "inactive")
 
                                 },
@@ -655,17 +804,32 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname Application name
                                 enable_user = function(userid, appname){
 
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+
                                   self$set_user_active_inactive(userid, appname, "active")
 
                                 },
 
                                 #' @description Get groups that the current user belongs to. See also `is_in_group`
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
-                                get_group = function(userid = NULL, appname = NULL){
+                                #' @param userid msal userid
+                                #' @param appname application name
+                                get_group = function(userid, appname){
 
-                                  if(is.null(userid))userid <- self$userid
-                                  if(is.null(appname))appname <- self$appname
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("select groups from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
 
@@ -695,15 +859,22 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 #' @description Set the group for this user.
                                 #' @param group Group name
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
+                                #' @param userid msal userid
+                                #' @param appname application name
                                 set_group = function(userid, appname, group){
 
                                   # In previous version if NULL, the set_group was ignored.
                                   # This however caused the removal of all groups to be impossible
                                   # The statement has been commented for now in case something breaks
 
-                                  # if(is.null(group))return(NULL)
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   if(is.null(group)){
                                     group <- ""
@@ -735,9 +906,18 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 },
 
                                 #' @description Remove a role for a user
-                                #' @param userid rsconnect username (can be NULL, uses userid on init)
-                                #' @param appname rsconnect application name
-                                remove_role = function(userid, appname){
+                                #' @param userid msal userid
+                                #' @param appname  application name
+                                remove_msal_account_from_app = function(userid, appname){
+
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("delete from {self$schema}.shiny_msal_accounts where userid = ?userid and appname = ?appname") %>% as.character()
 
@@ -752,12 +932,22 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 #' @description Does the current user have a role? `$has_role("admin")` --> bool
                                 #' @param role The user role, typically 'admin', 'viewer'
-                                has_role = function(role){
+                                #' @param userid msal userid
+                                #' @param appname  application name
+                                has_role = function(role, userid, appname){
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   if(role == "admin" && self$ad_authentication){
                                     self$is_admin()
                                   } else {
-                                    roles <- self$get_role()
+                                    roles <- self$get_role(userid = userid, appname = appname)
                                     isTRUE(as.character(role) %in% as.character(roles))
                                   }
 
@@ -780,8 +970,13 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 #' @description Get available roles for an application
                                 #' @details !! Do not use in shiny applications (except shintousers_app) !!
-                                #' @param appname The rsconnect application name
+                                #' @param appname The application name
                                 get_application_roles = function(appname){
+
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("select roles from {self$schema}.applications where appname = ?appname") %>% as.character()
 
@@ -802,8 +997,13 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 #' @description Add an application to the list of applications
                                 #' @details !! Do not use in shiny applications (except shintousers_app) !!
-                                #' @param appname The rsconnect application name
+                                #' @param appname The application name
                                 get_application_groups = function(appname){
+
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
 
                                   qu <- glue::glue("select groups from {self$schema}.applications where appname = ?appname") %>% as.character()
 
@@ -862,8 +1062,25 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                 #' @param appname appname of the application the invite is sent for
                                 #' @param role the roles the invitee should get upon accepting
                                 #' @param groups the groups the invitee should belong to upon accepting
-                                add_invite = function(email, username = NULL, invite_sent_by, appname, role = NA, groups = NA){
-                                  if(is.na(groups)){
+                                #' @param expire_date The date on which the invite expires
+                                add_invite = function(email, username = NULL, invite_sent_by, appname, role = NA, groups = NULL){
+
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(email) || trimws(email) == ""){
+                                    message("The input email is NULL. Stopping execution.")
+                                    stop("Function terminated because email is NULL.")
+                                  }
+                                  if(is.null(invite_sent_by) || trimws(invite_sent_by) == ""){
+                                    message("The input invite_sent_by is NULL. Stopping execution.")
+                                    stop("Function terminated because invite_sent_by is NULL.")
+                                  }
+
+                                  email_lowered <- tolower(email)
+
+                                  if(is.null(groups)){
                                     parsed_groups <- ""
                                   } else {
                                     parsed_groups <- self$to_json(groups)
@@ -874,7 +1091,7 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                   query <- DBI::sqlInterpolate(DBI::ANSI(),
                                                                qu,
-                                                               email = email,
+                                                               email = email_lowered,
                                                                username = username,
                                                                invite_sent_by = invite_sent_by,
                                                                appname = appname,
@@ -885,55 +1102,154 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 },
 
-                                #' @description Checks if there is an invite connected to email adress for appname
-                                #' @param appname rsconnect application name
+                                #' @description Checks if there is an invite connected to email address for appname
+                                #' @param appname application name
                                 #' @param email email address of user to be checked
-                                has_invite = function(appname, email){
+                                #' @param ignore_expiration_date Boolean that tells if a filter should be applied based on expiration date. Handy to find if any invite exits or a to find invites that are still valid
+                                has_invite = function(appname, email, ignore_expiration_date = FALSE){
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(email) || trimws(email) == ""){
+                                    message("The input email is NULL. Stopping execution.")
+                                    stop("Function terminated because email is NULL.")
+                                  }
+
+                                  email_lowered <- tolower(email)
+
                                   qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts_pending_invites where appname = ?appname AND email = ?email") %>% as.character()
 
 
                                   query <- DBI::sqlInterpolate(DBI::ANSI(),
                                                                qu,
                                                                appname = appname,
-                                                               email = email)
+                                                               email = email_lowered)
 
                                   out <- self$query(query)
 
-                                  if(nrow(out) > 0){
-                                    return(TRUE)
+                                  if(ignore_expiration_date){
+                                    out <- out
                                   } else {
+                                    out <- out %>%
+                                      dplyr::filter(lubridate::now() <= expire_date)
+                                  }
+
+                                  if(nrow(out) == 1){
+                                    return(TRUE)
+                                  } else if(nrow(out) == 0){
                                     return(FALSE)
+                                  } else {
+                                    message("Impossible amount of invites for user; can only be zero or one.")
+                                    stop("Function terminated because something is wrong with invites for this person")
                                   }
 
                                 },
 
                                 #' @description Checks if there is an invite connected to email adress for appname
-                                #' @param appname rsconnect application name
+                                #' @param appname application name
                                 #' @param email email address of user to be checked
                                 get_invite = function(appname, email){
+
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(email) || trimws(email) == ""){
+                                    message("The input email is NULL. Stopping execution.")
+                                    stop("Function terminated because email is NULL.")
+                                  }
+
+                                  email_lowered <- tolower(email)
+
                                   qu <- glue::glue("select * from {self$schema}.shiny_msal_accounts_pending_invites where appname = ?appname AND email = ?email") %>% as.character()
 
 
                                   query <- DBI::sqlInterpolate(DBI::ANSI(),
                                                                qu,
                                                                appname = appname,
-                                                               email = email)
+                                                               email = email_lowered)
 
                                   out <- self$query(query)
 
                                   if(nrow(unique(out)) > 1){
                                     message("Multiple different invites for user sent. No way of knowing which one is correct. Please check.")
-                                    return(NULL)
+                                    stop("Function terminated because impossible amount of invites for user is present")
                                   } else {
                                     return(unique(out))
                                   }
 
                                 },
 
+                                #' @description Update an invitation for a user
+                                #' @param invite_id The id of the invitation in de the table shiny_msal_accounts_pending_invites
+                                #' @param email email of the user to be invited
+                                #' @param username name of the user
+                                #' @param invite_sent_by name of user that sent invite
+                                #' @param appname appname of the application the invite is sent for
+                                #' @param role the roles the invitee should get upon accepting
+                                #' @param groups the groups the invitee should belong to upon accepting
+                                #' @param expire_date The date on which the invite expires
+                                update_invite = function(invite_id, email, username = NULL, invite_sent_by, appname, role = NA, groups = NULL){
+
+                                  if(is.null(invite_id) || trimws(invite_id) == ""){
+                                    message("The input invite_id is NULL. Stopping execution.")
+                                    stop("Function terminated because invite_id is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(email) || trimws(email) == ""){
+                                    message("The input email is NULL. Stopping execution.")
+                                    stop("Function terminated because email is NULL.")
+                                  }
+                                  if(is.null(invite_sent_by) || trimws(invite_sent_by) == ""){
+                                    message("The input invite_sent_by is NULL. Stopping execution.")
+                                    stop("Function terminated because invite_sent_by is NULL.")
+                                  }
+
+                                  email_lowered <- tolower(email)
+
+                                  if(is.null(groups)){
+                                    parsed_groups <- ""
+                                  } else {
+                                    parsed_groups <- self$to_json(groups)
+                                  }
+
+
+
+                                  qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts_pending_invites SET email=?email, username=?username, invite_sent_by=?invite_sent_by, invite_date_sent=NOW(), role=?role, groups=?parsed_groups, expire_date=NOW() + INTERVAL '7 days' WHERE invite_id = ?invite_id") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               email = email_lowered,
+                                                               username = username,
+                                                               invite_sent_by = invite_sent_by,
+                                                               role = role,
+                                                               parsed_groups = parsed_groups,
+                                                               invite_id = invite_id)
+
+                                  self$execute_query(query)
+
+                                },
+
+
                                 #' @description Remove an invitation for a user
                                 #' @param inviteid id of invitation to be deleted
-                                #' @param appname rsconnect application name
+                                #' @param appname application name
                                 remove_invite = function(inviteid, appname){
+
+                                  if(is.null(inviteid) || trimws(inviteid) == ""){
+                                    message("The input inviteid is NULL. Stopping execution.")
+                                    stop("Function terminated because inviteid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+
                                   qu <- glue::glue("delete from {self$schema}.shiny_msal_accounts_pending_invites where invite_id = ?invite_id and appname = ?appname") %>% as.character()
 
                                   query <- DBI::sqlInterpolate(DBI::ANSI(),
@@ -942,6 +1258,56 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                                                appname = appname)
 
                                   self$execute_query(query)
+
+                                },
+
+                                ##### Extra logging #####
+
+                                #' @description Add a logging entry for MSAL users
+                                #' @param user_id id of user causing the action that is logged
+                                #' @param appname application name
+                                #' @param action_type Categorical type of action
+                                #' @param logging_message Detailed logging message
+                                make_msal_log = function(user_id, appname, action_type, logging_message){
+
+                                  if(is.null(user_id) || trimws(user_id) == ""){
+                                    message("The input user_id is NULL. Stopping execution.")
+                                    stop("Function terminated because user_id is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+                                  if(is.null(action_type) || trimws(action_type) == ""){
+                                    message("The input action_type is NULL. Stopping execution.")
+                                    stop("Function terminated because action_type is NULL.")
+                                  }
+                                  if(is.null(logging_message) || trimws(logging_message) == ""){
+                                    message("The input logging_message is NULL. Stopping execution.")
+                                    stop("Function terminated because logging_message is NULL.")
+                                  }
+
+                                  qu <- glue::glue("INSERT INTO {self$schema}.shiny_msal_logging (user_id, appname, action_type, logging_message) VALUES(?user_id, ?appname, ?action_type, ?logging_message)") %>% as.character()
+
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               user_id = user_id,
+                                                               appname = appname,
+                                                               action_type = action_type,
+                                                               logging_message = logging_message)
+
+                                  self$execute_query(query)
+
+                                },
+
+
+                                ##### Internal Use ######
+                                #' @description Get list of available applications
+                                #' @details !! Do not use in shiny applications (except shintousers_app) !!
+                                get_applications = function(){
+
+                                  sort(self$query(glue::glue("select appname from {self$schema}.applications"))$appname)
 
                                 }
 

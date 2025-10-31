@@ -15,7 +15,7 @@ msalUserManagementModule(input, output, session, .user, appname)
 
 \item{.user}{user object, connection to the shintousers database and functions necessary}
 
-\item{appname}{appname for whoch the user can see connections}
+\item{appname}{appname for which the user can see connections}
 }
 \description{
 A light version from our internal shintousers-app, so admin users can edit rights within the app
