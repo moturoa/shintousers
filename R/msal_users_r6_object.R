@@ -146,10 +146,10 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 #' @description Read username for a user (default = current user)
                                 #' @param userid Vector of user ID's
-                                #' @param appname Application name (can be NULL, appname on init is then used)
+                                #' @param appname Application name
                                 get_name = function(userid, appname){
 
-                                  if(is.null(userid) || trimws(userid) == ""){
+                                  if(is.null(userid) || all(trimws(userid) == "")){
                                     message("The input userid is NULL. Stopping execution.")
                                     stop("Function terminated because userid is NULL.")
                                   }

@@ -244,7 +244,7 @@ Read username for a user (default = current user)
 \describe{
 \item{\code{userid}}{Vector of user ID's}
 
-\item{\code{appname}}{Application name (can be NULL, appname on init is then used)}
+\item{\code{appname}}{Application name}
 }
 \if{html}{\out{</div>}}
 }
