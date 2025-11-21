@@ -165,7 +165,7 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
                                     dplyr::collect() |>
                                     dplyr::pull()
 
-                                  if(length(data) == 0 || is.null(data) || is.na(data)){
+                                  if(length(data) == 0 || is.null(data) || all(is.na(data))){
                                     return(NULL)
                                   } else {
                                     return(data)
