@@ -851,9 +851,20 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 #' @description Is the user in this group? `$is_in_group("superuser")` -> bool
                                 #' @param group Group name
-                                is_in_group = function(group){
+                                #' @param userid msal userid
+                                #' @param appname application name
+                                is_in_group = function(group, userid, appname){
 
-                                  isTRUE(group %in% self$get_group())
+                                  if(is.null(userid) || trimws(userid) == ""){
+                                    message("The input userid is NULL. Stopping execution.")
+                                    stop("Function terminated because userid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+
+                                  isTRUE(group %in% self$get_group(userid, appname))
 
                                 },
 
