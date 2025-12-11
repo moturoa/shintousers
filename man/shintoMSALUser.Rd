@@ -666,13 +666,17 @@ Get groups that the current user belongs to. See also `is_in_group`
 \subsection{Method \code{is_in_group()}}{
 Is the user in this group? `$is_in_group("superuser")` -> bool
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$is_in_group(group)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$is_in_group(group, userid, appname)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{group}}{Group name}
+
+\item{\code{userid}}{msal userid}
+
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }

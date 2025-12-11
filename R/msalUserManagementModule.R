@@ -89,6 +89,7 @@ msalUserManagementUI <- function(id){
 #' @param session R session object of the module
 #' @param .user user object, connection to the shintousers database and functions necessary
 #' @param appname appname for which the user can see connections
+#' @param shinto_intern Boolean. If TRUE, we run a internal instance (shintousers app) so we can add specific groups we do not want users to be able to access (for example "ontwikkelaar")
 #' @importFrom gargoyle init trigger watch
 #' @importFrom shiny reactive observe observeEvent showModal modalDialog tagList textInput radioButtons selectInput actionButton removeModal
 #' @importFrom dplyr filter collect mutate slice
@@ -98,7 +99,7 @@ msalUserManagementUI <- function(id){
 #' @importFrom softui bsicon
 #' @importFrom softui datatafel
 #' @export
-msalUserManagementModule <- function(input, output, session, .user, appname){
+msalUserManagementModule <- function(input, output, session, .user, appname, shinto_intern = FALSE){
 
   ns <- session$ns
 
@@ -198,9 +199,15 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
                            selected = cur_role
         ),
 
-        shiny::selectInput(ns("sel_group_edit"), "Groepen",
-                           choices = .user$get_application_groups(appname),
-                           selected = cur_group, multiple = TRUE),
+        if(shinto_intern){
+          shiny::selectInput(ns("sel_group_edit"), "Groepen",
+                             choices = c(.user$get_application_groups(appname), "ontwikkelaar"),
+                             selected = cur_group, multiple = TRUE)
+        } else {
+          shiny::selectInput(ns("sel_group_edit"), "Groepen",
+                             choices = .user$get_application_groups(appname),
+                             selected = cur_group, multiple = TRUE)
+        },
 
         shiny::textInput(ns("txt_comment_edit"), "Korte opmerking",
                          value = cur_comment),
@@ -308,9 +315,15 @@ msalUserManagementModule <- function(input, output, session, .user, appname){
         shiny::selectInput(ns("sel_role_invite"), "Rol",
                            choices = .user$get_application_roles(appname)
         ),
-        shiny::selectInput(ns("sel_group_invite"), "Groepen",
-                           choices = .user$get_application_groups(appname),
-                           multiple = TRUE),
+        if(shinto_intern){
+          shiny::selectInput(ns("sel_group_edit"), "Groepen",
+                             choices = c(.user$get_application_groups(appname), "ontwikkelaar"),
+                             multiple = TRUE)
+        } else {
+          shiny::selectInput(ns("sel_group_edit"), "Groepen",
+                             choices = .user$get_application_groups(appname),
+                             multiple = TRUE)
+        },
 
         footer = shiny::tagList(
           shiny::actionButton(ns("btn_close_invite_user_modal"), "Annuleren",

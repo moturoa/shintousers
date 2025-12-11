@@ -4,7 +4,14 @@
 \alias{msalUserManagementModule}
 \title{MSAL User Management Module}
 \usage{
-msalUserManagementModule(input, output, session, .user, appname)
+msalUserManagementModule(
+  input,
+  output,
+  session,
+  .user,
+  appname,
+  shinto_intern = FALSE
+)
 }
 \arguments{
 \item{input}{input modalities of the module}
@@ -16,6 +23,8 @@ msalUserManagementModule(input, output, session, .user, appname)
 \item{.user}{user object, connection to the shintousers database and functions necessary}
 
 \item{appname}{appname for which the user can see connections}
+
+\item{shinto_intern}{Boolean. If TRUE, we run a internal instance (shintousers app) so we can add specific groups we do not want users to be able to access (for example "ontwikkelaar")}
 }
 \description{
 A light version from our internal shintousers-app, so admin users can edit rights within the app
