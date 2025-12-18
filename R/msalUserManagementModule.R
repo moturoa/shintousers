@@ -99,7 +99,7 @@ msalUserManagementUI <- function(id){
 #' @importFrom softui bsicon
 #' @importFrom softui datatafel
 #' @export
-msalUserManagementModule <- function(input, output, session, .user, appname, shinto_intern = FALSE){
+msalUserManagementModule <- function(input, output, session, .user, appname = reactive(NULL), shinto_intern = FALSE){
 
   ns <- session$ns
 
@@ -110,7 +110,7 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
     gargoyle::watch("edit_role")
 
     .user$read_table("shiny_msal_accounts", lazy = TRUE) %>%
-      dplyr::filter(appname == !!appname) %>%
+      dplyr::filter(appname == !!appname()) %>%
       dplyr::collect()
   })
 
@@ -118,7 +118,7 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
     gargoyle::watch("edit_invites")
 
     .user$read_table("shiny_msal_accounts_pending_invites", lazy = TRUE) %>%
-      dplyr::filter(appname == !!appname) %>%
+      dplyr::filter(appname == !!appname()) %>%
       dplyr::collect()
   })
 
@@ -154,7 +154,7 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
 
   shiny::observeEvent(input$btn_remove_person, {
 
-    .user$remove_msal_account_from_app(userid = selected_persoon()$userid, appname = appname)
+    .user$remove_msal_account_from_app(userid = selected_persoon()$userid, appname = appname())
     shinytoastr::toastr_success("Persoon verwijderd")
     gargoyle::trigger("edit_role")
 
@@ -163,13 +163,13 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
   # Persoon bewerken
   shiny::observeEvent(input$btn_edit_user, {
 
-    cur_role <- .user$get_role(selected_persoon()$userid, appname)
-    cur_group <- .user$get_group(selected_persoon()$userid, appname)
-    cur_name <- .user$get_name(selected_persoon()$userid, appname)
-    cur_email <- .user$get_email(selected_persoon()$userid, appname)
-    cur_comment <- .user$get_comment(selected_persoon()$userid, appname)
-    cur_attribute <- .user$get_user_attributes(selected_persoon()$userid, appname)
-    cur_active <- .user$get_user_active_inactive(selected_persoon()$userid, appname)
+    cur_role <- .user$get_role(selected_persoon()$userid, appname())
+    cur_group <- .user$get_group(selected_persoon()$userid, appname())
+    cur_name <- .user$get_name(selected_persoon()$userid, appname())
+    cur_email <- .user$get_email(selected_persoon()$userid, appname())
+    cur_comment <- .user$get_comment(selected_persoon()$userid, appname())
+    cur_attribute <- .user$get_user_attributes(selected_persoon()$userid, appname())
+    cur_active <- .user$get_user_active_inactive(selected_persoon()$userid, appname())
 
     shiny::showModal(
       shiny::modalDialog(
@@ -195,17 +195,17 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
                             selected = ifelse(cur_active, "active", "inactive")),
 
         shiny::selectInput(ns("sel_role_edit"), "Rol",
-                           choices = .user$get_application_roles(appname),
+                           choices = .user$get_application_roles(appname()),
                            selected = cur_role
         ),
 
         if(shinto_intern){
           shiny::selectInput(ns("sel_group_edit"), "Groepen",
-                             choices = c(.user$get_application_groups(appname), "ontwikkelaar"),
+                             choices = c(.user$get_application_groups(appname()), "ontwikkelaar"),
                              selected = cur_group, multiple = TRUE)
         } else {
           shiny::selectInput(ns("sel_group_edit"), "Groepen",
-                             choices = .user$get_application_groups(appname),
+                             choices = .user$get_application_groups(appname()),
                              selected = cur_group, multiple = TRUE)
         },
 
@@ -232,25 +232,25 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
 
   shiny::observeEvent(input$btn_confirm_edit_user, {
     .user$set_user_name(userid = input$txt_userid_edit,
-                        appname = appname,
+                        appname = appname(),
                         username = input$txt_name_edit)
     # .user$set_user_email(userid = input$txt_userid_edit,
     #                      appname = appname,
     #                      email = input$txt_email_edit)
     .user$set_role(userid = input$txt_userid_edit,
-                   appname = appname,
+                   appname = appname(),
                    role = input$sel_role_edit)
     .user$set_group(userid = input$txt_userid_edit,
-                    appname = appname,
+                    appname = appname(),
                     group = input$sel_group_edit)
     .user$set_comment(userid = input$txt_userid_edit,
-                      appname = appname,
+                      appname = appname(),
                       comments = input$txt_comment_edit)
     .user$set_user_attributes(userid = input$txt_userid_edit,
-                              appname = appname,
+                              appname = appname(),
                               attributes = NULL) #list(naam = input$txt_name)
     .user$set_user_active_inactive(userid = input$txt_userid_edit,
-                                   appname = appname,
+                                   appname = appname(),
                                    what = input$rad_persoon_active)
 
 
@@ -292,7 +292,7 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
 
 
   shiny::observeEvent(input$btn_remove_invite, {
-    .user$remove_invite(inviteid = selected_invite()$invite_id, appname = appname)
+    .user$remove_invite(inviteid = selected_invite()$invite_id, appname = appname())
     shinytoastr::toastr_success("Uitnodiging verwijderd")
     gargoyle::trigger("edit_invites")
 
@@ -313,15 +313,15 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
         shiny::textInput(ns("txt_name_invite"), "Gebruiker naam (label)"),
 
         shiny::selectInput(ns("sel_role_invite"), "Rol",
-                           choices = .user$get_application_roles(appname)
+                           choices = .user$get_application_roles(appname())
         ),
         if(shinto_intern){
-          shiny::selectInput(ns("sel_group_edit"), "Groepen",
-                             choices = c(.user$get_application_groups(appname), "ontwikkelaar"),
+          shiny::selectInput(ns("sel_group_invite"), "Groepen",
+                             choices = c(.user$get_application_groups(appname()), "ontwikkelaar"),
                              multiple = TRUE)
         } else {
-          shiny::selectInput(ns("sel_group_edit"), "Groepen",
-                             choices = .user$get_application_groups(appname),
+          shiny::selectInput(ns("sel_group_invite"), "Groepen",
+                             choices = .user$get_application_groups(appname()),
                              multiple = TRUE)
         },
 
@@ -350,23 +350,23 @@ msalUserManagementModule <- function(input, output, session, .user, appname, shi
     } else {
       email_lowered <- tolower(input$txt_email_invite)
 
-      check_for_existing_invite <- .user$has_invite(appname, email_lowered, ignore_expiration_date = TRUE)
+      check_for_existing_invite <- .user$has_invite(appname(), email_lowered, ignore_expiration_date = TRUE)
 
       if(check_for_existing_invite){
-        invite_data <- .user$get_invite(appname = appname, email = email_lowered)
+        invite_data <- .user$get_invite(appname = appname(), email = email_lowered)
 
         .user$update_invite(invite_id = invite_data$invite_id,
                             email = email_lowered,
                             username = input$txt_name_invite,
                             invite_sent_by = .user$userid,
-                            appname = appname,
+                            appname = appname(),
                             role = input$sel_role_invite,
                             groups = input$sel_group_invite)
       } else {
         .user$add_invite(email = email_lowered,
                          username = input$txt_name_invite,
                          invite_sent_by = .user$userid,
-                         appname = appname,
+                         appname = appname(),
                          role = input$sel_role_invite,
                          groups = input$sel_group_invite)
       }

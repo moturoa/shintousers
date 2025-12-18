@@ -9,7 +9,7 @@ msalUserManagementModule(
   output,
   session,
   .user,
-  appname,
+  appname = reactive(NULL),
   shinto_intern = FALSE
 )
 }
