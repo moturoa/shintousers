@@ -1246,6 +1246,31 @@ shintoMSALUser <- R6::R6Class(classname = "ShintoMSALUser",
 
                                 },
 
+                                #' @description Refresh a pending invitation for a user
+                                #' @param inviteid id of invitation to be deleted
+                                #' @param appname application name
+                                refresh_invite = function(inviteid, appname){
+
+                                  if(is.null(inviteid) || trimws(inviteid) == ""){
+                                    message("The input inviteid is NULL. Stopping execution.")
+                                    stop("Function terminated because inviteid is NULL.")
+                                  }
+                                  if(is.null(appname) || trimws(appname) == ""){
+                                    message("The input appname is NULL. Stopping execution.")
+                                    stop("Function terminated because appname is NULL.")
+                                  }
+
+                                  qu <- glue::glue("UPDATE {self$schema}.shiny_msal_accounts_pending_invites SET invite_date_sent = NOW(), expire_date=NOW() + INTERVAL '7 days' WHERE invite_id = ?invite_id and appname = ?appname") %>% as.character()
+
+                                  query <- DBI::sqlInterpolate(DBI::ANSI(),
+                                                               qu,
+                                                               invite_id = inviteid,
+                                                               appname = appname)
+
+                                  self$execute_query(query)
+
+                                },
+
 
                                 #' @description Remove an invitation for a user
                                 #' @param inviteid id of invitation to be deleted

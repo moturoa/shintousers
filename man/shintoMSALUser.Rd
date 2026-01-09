@@ -69,6 +69,7 @@ methods for user management. In Shiny apps, use `get_and_set_last_login`, for ex
 \item \href{#method-ShintoMSALUser-has_invite}{\code{shintoMSALUser$has_invite()}}
 \item \href{#method-ShintoMSALUser-get_invite}{\code{shintoMSALUser$get_invite()}}
 \item \href{#method-ShintoMSALUser-update_invite}{\code{shintoMSALUser$update_invite()}}
+\item \href{#method-ShintoMSALUser-refresh_invite}{\code{shintoMSALUser$refresh_invite()}}
 \item \href{#method-ShintoMSALUser-remove_invite}{\code{shintoMSALUser$remove_invite()}}
 \item \href{#method-ShintoMSALUser-make_msal_log}{\code{shintoMSALUser$make_msal_log()}}
 \item \href{#method-ShintoMSALUser-get_applications}{\code{shintoMSALUser$get_applications()}}
@@ -925,6 +926,25 @@ Update an invitation for a user
 \item{\code{groups}}{the groups the invitee should belong to upon accepting}
 
 \item{\code{expire_date}}{The date on which the invite expires}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ShintoMSALUser-refresh_invite"></a>}}
+\if{latex}{\out{\hypertarget{method-ShintoMSALUser-refresh_invite}{}}}
+\subsection{Method \code{refresh_invite()}}{
+Refresh a pending invitation for a user
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{shintoMSALUser$refresh_invite(inviteid, appname)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{inviteid}}{id of invitation to be deleted}
+
+\item{\code{appname}}{application name}
 }
 \if{html}{\out{</div>}}
 }

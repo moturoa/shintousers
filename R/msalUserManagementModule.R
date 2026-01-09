@@ -56,6 +56,12 @@ msalUserManagementUI <- function(id){
                                                                                                                             icon = bsicon("person-fill-add"),
                                                                                                                             class = "btn-light"),
                                                                                                         shinyjs::hidden(
+                                                                                                          shiny::actionButton(ns("btn_refresh_invite"),
+                                                                                                                              "Uitnodiging verversen",
+                                                                                                                              icon = bsicon("arrow-clockwise"),
+                                                                                                                              class = "btn-light")
+                                                                                                        ),
+                                                                                                        shinyjs::hidden(
                                                                                                           shiny::actionButton(ns("btn_remove_invite"),
                                                                                                                               "Verwijderen",
                                                                                                                               icon = bsicon("person-dash"),
@@ -98,6 +104,8 @@ msalUserManagementUI <- function(id){
 #' @importFrom shinytoastr toastr_success toastr_error
 #' @importFrom softui bsicon
 #' @importFrom softui datatafel
+#' @importFrom glue glue
+#' @importFrom lubridate today
 #' @export
 msalUserManagementModule <- function(input, output, session, .user, appname = reactive(NULL), shinto_intern = FALSE){
 
@@ -288,6 +296,14 @@ msalUserManagementModule <- function(input, output, session, .user, appname = re
   shiny::observe({
     sel_invite <- selected_invite()
     shinyjs::toggle("btn_remove_invite", condition = !is.null(sel_invite))
+    shinyjs::toggle("btn_refresh_invite", condition = !is.null(sel_invite))
+  })
+
+  shiny::observeEvent(input$btn_refresh_invite, {
+    .user$refresh_invite(inviteid = selected_invite()$invite_id, appname = appname())
+    shinytoastr::toastr_success(glue::glue("Uitnodiging verversd naar {lubridate::today()+7}"))
+    gargoyle::trigger("edit_invites")
+
   })
 
 
